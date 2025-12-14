@@ -1,0 +1,108 @@
+================================================================================
+  GITHUB + CLOUDFLARE DEPLOYMENT COMMANDS
+  Copy and paste these into your terminal (Git Bash or Command Prompt)
+================================================================================
+
+STEP 1: CONFIGURE GIT (First Time Only)
+================================================================================
+git config --global user.name "Your Name"
+git config --global user.email "your-github-email@example.com"
+
+
+STEP 2: NAVIGATE TO PROJECT
+================================================================================
+cd "c:\VS Repositry\Instruments"
+
+
+STEP 3: ADD ALL FILES TO GIT
+================================================================================
+git add .
+
+
+STEP 4: CREATE FIRST COMMIT
+================================================================================
+git commit -m "Initial deployment - AGI Automations portfolio with 4 tools"
+
+
+STEP 5: CREATE GITHUB REPO (Do this in browser first!)
+================================================================================
+1. Go to: https://github.com/new
+2. Repository name: agi-automations-portfolio
+3. Description: Data infrastructure tools for real estate agencies
+4. Visibility: Public
+5. DO NOT check "Initialize this repository with a README"
+6. Click "Create repository"
+7. Copy the repository URL (looks like: https://github.com/YOUR-USERNAME/agi-automations-portfolio.git)
+
+
+STEP 6: CONNECT TO GITHUB (Replace YOUR-USERNAME!)
+================================================================================
+git remote add origin https://github.com/YOUR-USERNAME/agi-automations-portfolio.git
+git branch -M main
+git push -u origin main
+
+
+STEP 7: DEPLOY TO CLOUDFLARE PAGES (Do this in browser!)
+================================================================================
+1. Go to: https://dash.cloudflare.com
+2. Click "Workers & Pages" in left sidebar
+3. Click "Create application"
+4. Click "Pages" tab
+5. Click "Connect to Git"
+6. Click "Connect GitHub" and authorize Cloudflare
+7. Select your repository: agi-automations-portfolio
+8. Click "Begin setup"
+9. Configure settings:
+   - Framework preset: None
+   - Build command: (leave empty)
+   - Build output directory: /
+10. Click "Save and Deploy"
+11. Wait 30-60 seconds
+12. Your site is live at: https://agi-automations-portfolio.pages.dev
+
+
+STEP 8: FUTURE UPDATES (After initial deployment)
+================================================================================
+# Make changes to your files, then:
+git add .
+git commit -m "Description of your changes"
+git push
+
+# Cloudflare automatically redeploys in ~30 seconds!
+
+
+TROUBLESHOOTING COMMANDS
+================================================================================
+
+# Check git status
+git status
+
+# View commit history
+git log --oneline
+
+# If "remote origin already exists" error:
+git remote remove origin
+git remote add origin https://github.com/YOUR-USERNAME/agi-automations-portfolio.git
+
+# If push fails:
+git pull origin main --rebase
+git push origin main
+
+# Verify git is initialized:
+git status
+# Should NOT say "fatal: not a git repository"
+
+
+USEFUL LINKS
+================================================================================
+GitHub: https://github.com
+Cloudflare: https://dash.cloudflare.com
+Your Repo (after creation): https://github.com/YOUR-USERNAME/agi-automations-portfolio
+
+
+================================================================================
+  READY TO DEPLOY!
+  1. Open Git Bash or Command Prompt
+  2. Copy commands from STEP 1-6 above
+  3. Then follow browser steps for STEP 7
+================================================================================

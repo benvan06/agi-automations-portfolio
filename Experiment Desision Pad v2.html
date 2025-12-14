@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Experiment Decision Pad — v2.1 (Real Estate)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React 18 + ReactDOM (production) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for in-browser JSX transform -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="bg-slate-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useMemo, useState, useRef } = React;
+
+      function ExperimentDecisionPad_v2_1() {
+        // ---- Inputs (seeded with sensible RE defaults) ----
+        const [inputs, setInputs] = useState({
+          traffic: {
+            A: { users: 2000, convCount: 220, revenuePerUser: 0 },
+            B: { users: 1980, convCount: 260, revenuePerUser: 0 },
+          },
+          priors: { mde: 0.1, riskAppetite: "medium" },
+          observed: {
+            bounceRate: 0.41,
+            p95LatencyMs: 1150,
+            churnLift: 0.02,
+            invalidEnquiryRate: 0.05,
+            valuationCancelRate: 0.1,
+            unsubscribeRate: 0.0015,
+            portalFeedErrorRate: 0.004,
+            amlKycDropoffLift: 0.0,
+            medianTimeToContactMin: 12,
+          },
+          guardrailThresholds: {
+            bounceMax: 0.45,
+            p95LatencyMaxMs: 1200,
+            churnLiftMax: 0.03,
+            invalidEnquiryMax: 0.08,
+            valuationCancelMax: 0.12,
+            unsubscribeMax: 0.002,
+            portalFeedErrorMax: 0.01,
+            amlKycDropoffMaxLift: 0.05,
+            medianTimeToContactMaxMin: 15,
+          },
+          riskPolicy: {
+            low: { allowMinorBreaches: 0 },
+            medium: { allowMinorBreaches: 1 },
+            high: { allowMinorBreaches: 2 },
+          },
+          funnel: {
+            showRateA: 0.68,
+            showRateB: 0.71,
+            instrRateA: 0.24,
+            instrRateB: 0.26,
+            feePerInstructionGBP: 3500,
+            medianTimeToContactMinA: 18,
+            medianTimeToContactMinB: 12,
+          },
+          logicVersion: "v2.1-RE",
+        });
+
+        // Advanced toggles / what-ifs
+        const [whatIfUsersPerArm, setWhatIfUsersPerArm] = useState(5000);
+        const [whatIfLift, setWhatIfLift] = useState(0.1);
+        const [lowDataMode, setLowDataMode] = useState(true);
+
+        // Collapsibles
+        const [open, setOpen] = useState({
+          traffic: true,
+          priors: true,
+          observed: false,
+          thresholds: false,
+          funnel: false,
+          advanced: false,
+        });
+
+        // ---- Helpers ----
+        const z95 = 1.96;
+        const clampNonNeg = (x) => (Number.isFinite(x) && x >= 0 ? x : 0);
+        const fmtPct = (x, d = 2) => (Number.isFinite(x) ? `${(x * 100).toFixed(d)}%` : "—");
+        const fmtInt = (x) => (Number.isFinite(x) ? Math.round(x) : "—");
+        const fmtGBP = (x) =>
+          Number.isFinite(x)
+            ? new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(x)
+            : "—";
+        const clone = (obj) => (typeof structuredClone === "function" ? structuredClone(obj) : JSON.parse(JSON.stringify(obj)));
+
+        function agrestiCoull(x, n, z = z95) {
+          const z2 = z * z;
+          const nT = n + z2;
+          const pT = nT > 0 ? (x + z2 / 2) / nT : 0;
+          const vT = nT > 0 ? (pT * (1 - pT)) / nT : NaN;
+          return { pT, vT, nT };
+        }
+        function diffCI95_AC(xA, nA, xB, nB, z = z95) {
+          const { pT: pA, vT: vA } = agrestiCoull(xA, nA, z);
+          const { pT: pB, vT: vB } = agrestiCoull(xB, nB, z);
+          const diff = pB - pA;
+          const se = Math.sqrt((vA ?? 0) + (vB ?? 0));
+          if (!Number.isFinite(se) || se <= 0) return { diff, lo: NaN, hi: NaN, se, pA, pB };
+          return { diff, lo: diff - z * se, hi: diff + z * se, se, pA, pB };
+        }
+        function erf(x) {
+          const sign = Math.sign(x);
+          x = Math.abs(x);
+          const a1 = 0.254829592,
+            a2 = -0.284496736,
+            a3 = 1.421413741,
+            a4 = -1.453152027,
+            a5 = 1.061405429,
+            p = 0.3275911;
+          const t = 1 / (1 + p * x);
+          const y = 1 - (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t) * Math.exp(-x * x);
+          return sign * y;
+        }
+        const cdf = (z) => 0.5 * (1 + erf(z / Math.SQRT2));
+        function qnorm(p) {
+          if (p <= 0 || p >= 1) return NaN;
+          const a = [-39.6968302866538, 220.946098424521, -275.928510446969, 138.357751867269, -30.6647980661472, 2.50662827745924];
+          const b = [-54.4760987982241, 161.585836858041, -155.698979859887, 66.8013118877197, -13.2806815528857];
+          const c = [-0.00778489400243029, -0.322396458041136, -2.40075827716184, -2.54973253934373, 4.37466414146497, 2.93816398269878];
+          const d = [0.00778469570904146, 0.32246712907004, 2.44513413714299, 3.75440866190742];
+          const plow = 0.02425, phigh = 1 - plow;
+          let q, r;
+          if (p < plow) {
+            q = Math.sqrt(-2 * Math.log(p));
+            return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+                   ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+          } else if (p > phigh) {
+            q = Math.sqrt(-2 * Math.log(1 - p));
+            return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+                     ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+          } else {
+            q = p - 0.5;
+            r = q * q;
+            return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+                   (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+          }
+        }
+        function powerTwoProportions(pA, pB, nA, nB, alpha = 0.05) {
+          if (!Number.isFinite(pA) || !Number.isFinite(pB) || nA <= 0 || nB <= 0) return NaN;
+          const z = qnorm(1 - alpha / 2);
+          const diff = pB - pA;
+          const se1 = Math.sqrt((pA * (1 - pA)) / nA + (pB * (1 - pB)) / nB);
+          if (!Number.isFinite(se1) || se1 <= 0) return NaN;
+          const delta = diff / se1;
+          return cdf(-z - delta) + (1 - cdf(z - delta));
+        }
+        function srmPValue(nA, nB) {
+          const total = nA + nB;
+          if (total <= 0) return 1;
+          const exp = total / 2;
+          const chi = ((nA - exp) ** 2) / exp + ((nB - exp) ** 2) / exp;
+          const z = Math.sqrt(chi);
+          const p = 2 * (1 - cdf(z));
+          return p;
+        }
+
+        // ---- CSV Import ----
+        function parseCSV(text) {
+          const lines = text.trim().split(/\r?\n/).filter(Boolean);
+          if (lines.length === 0) return [];
+          const headers = lines[0].split(",").map((h) => h.trim().toLowerCase());
+          return lines.slice(1).map((l) => {
+            const cells = l.split(",").map((x) => x.trim());
+            const row = {};
+            headers.forEach((h, i) => (row[h] = cells[i]));
+            return row;
+          });
+        }
+        function CSVLoader({ onLoad }) {
+          const ref = useRef(null);
+          return (
+            <div className="inline-flex items-center gap-2">
+              <button
+                className="text-xs px-2 py-1 rounded border border-slate-300 hover:bg-slate-50"
+                onClick={() => ref.current?.click()}
+              >
+                Import CSV
+              </button>
+              <input
+                ref={ref}
+                type="file"
+                accept=".csv"
+                className="hidden"
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  const text = await f.text();
+                  const rows = parseCSV(text);
+                  onLoad(rows);
+                  e.target.value = "";
+                }}
+              />
+            </div>
+          );
+        }
+
+        // ---- Presets ----
+        const presets = [
+          {
+            name: "Lead → Viewing",
+            apply: () =>
+              setInputs((prev) => ({
+                ...prev,
+                traffic: { A: { users: 1200, convCount: 180, revenuePerUser: 0 }, B: { users: 1180, convCount: 216, revenuePerUser: 0 } },
+                priors: { ...prev.priors, mde: 0.12, riskAppetite: "medium" },
+                funnel: { ...prev.funnel, showRateA: 0.68, showRateB: 0.72, instrRateA: 0.22, instrRateB: 0.25, feePerInstructionGBP: 3500 },
+                observed: { ...prev.observed, medianTimeToContactMin: 14, invalidEnquiryRate: 0.06 },
+                guardrailThresholds: { ...prev.guardrailThresholds, medianTimeToContactMaxMin: 15, invalidEnquiryMax: 0.08 },
+              })),
+          },
+          {
+            name: "Viewing → Offer",
+            apply: () =>
+              setInputs((prev) => ({
+                ...prev,
+                traffic: { A: { users: 600, convCount: 90, revenuePerUser: 0 }, B: { users: 620, convCount: 115, revenuePerUser: 0 } },
+                priors: { ...prev.priors, mde: 0.15, riskAppetite: "low" },
+                funnel: { ...prev.funnel, showRateA: 0.9, showRateB: 0.92, instrRateA: 0.4, instrRateB: 0.46, feePerInstructionGBP: 3500 },
+              })),
+          },
+          {
+            name: "Offer → Completion",
+            apply: () =>
+              setInputs((prev) => ({
+                ...prev,
+                traffic: { A: { users: 300, convCount: 180, revenuePerUser: 0 }, B: { users: 290, convCount: 190, revenuePerUser: 0 } },
+                priors: { ...prev.priors, mde: 0.08, riskAppetite: "low" },
+                funnel: { ...prev.funnel, feePerInstructionGBP: 4500 },
+                observed: { ...prev.observed, valuationCancelRate: 0.08 },
+                guardrailThresholds: { ...prev.guardrailThresholds, valuationCancelMax: 0.12 },
+              })),
+          },
+        ];
+
+        // ---- Appetite mapping ----
+        const appetiteMDEMap = { low: 0.08, medium: 0.1, high: 0.15 };
+        function setRiskAppetite(next) {
+          setInputs((prev) => ({
+            ...prev,
+            priors: { ...prev.priors, riskAppetite: next, mde: appetiteMDEMap[next] ?? prev.priors.mde },
+            riskPolicy: {
+              ...prev.riskPolicy,
+              [next]: { allowMinorBreaches: next === "low" ? 0 : next === "medium" ? 1 : 2 },
+            },
+          }));
+        }
+
+        // ---- Derived calculations ----
+        const d = useMemo(() => {
+          const A = inputs.traffic.A, B = inputs.traffic.B;
+          const nA = clampNonNeg(+A.users), nB = clampNonNeg(+B.users);
+          const xA = clampNonNeg(+A.convCount), xB = clampNonNeg(+B.convCount);
+          const rA = nA > 0 ? xA / nA : 0, rB = nB > 0 ? xB / nB : 0;
+          const lift = rA > 0 ? (rB - rA) / rA : rB > 0 ? Infinity : 0;
+
+          const ci = diffCI95_AC(xA, nA, xB, nB, z95);
+          const ciExcludesZero = Number.isFinite(ci.lo) && Number.isFinite(ci.hi) && (ci.lo > 0 || ci.hi < 0);
+
+          const mde = clampNonNeg(+inputs.priors.mde);
+          const pA = rA; const pB_expected = Math.min(Math.max(pA * (1 + mde), 0), 1);
+          const powerVsMDE = powerTwoProportions(pA, pB_expected, nA, nB, 0.05);
+
+          // Guardrails
+          const obs = inputs.observed, thr = inputs.guardrailThresholds;
+          const rails = [
+            { k: "bounceRate", label: "Bounce Rate", val: +obs.bounceRate, max: +thr.bounceMax, unit: "ratio" },
+            { k: "p95LatencyMs", label: "p95 Latency", val: +obs.p95LatencyMs, max: +thr.p95LatencyMaxMs, unit: "ms" },
+            { k: "churnLift", label: "Churn Lift", val: +obs.churnLift, max: +thr.churnLiftMax, unit: "ratio" },
+            { k: "medianTimeToContactMin", label: "Median Time-to-Contact", val: +obs.medianTimeToContactMin, max: +thr.medianTimeToContactMaxMin, unit: "min" },
+            { k: "invalidEnquiryRate", label: "Invalid Enquiry Rate", val: +obs.invalidEnquiryRate, max: +thr.invalidEnquiryMax, unit: "ratio", hard: true },
+            { k: "valuationCancelRate", label: "Valuation Cancel Rate", val: +obs.valuationCancelRate, max: +thr.valuationCancelMax, unit: "ratio" },
+            { k: "unsubscribeRate", label: "Unsubscribe/Complaint Rate", val: +obs.unsubscribeRate, max: +thr.unsubscribeMax, unit: "ratio", hard: true },
+            { k: "portalFeedErrorRate", label: "Portal Feed Error Rate", val: +obs.portalFeedErrorRate, max: +thr.portalFeedErrorMax, unit: "ratio" },
+            { k: "amlKycDropoffLift", label: "AML/KYC Drop-off (Δ)", val: +obs.amlKycDropoffLift, max: +thr.amlKycDropoffMaxLift, unit: "ratio" },
+          ].map((g) => {
+            const minorBand = g.max * 1.1;
+            let status = "PASS";
+            if (g.val > g.max) status = g.val <= minorBand ? "MINOR" : "FAIL";
+            if (g.hard && g.val > g.max) status = "FAIL";
+            return { ...g, status };
+          });
+
+          const hardFail = rails.some((g) => g.status === "FAIL");
+          const minorCnt = rails.filter((g) => g.status === "MINOR").length;
+          const allowMinor = inputs.riskPolicy[inputs.priors.riskAppetite]?.allowMinorBreaches ?? 0;
+          const railsPass = !hardFail && minorCnt <= allowMinor;
+
+          // Tests gate
+          const tests = [];
+          const nonNegOk = [nA, nB, xA, xB, clampNonNeg(+A.revenuePerUser), clampNonNeg(+B.revenuePerUser)].every((v) => Number.isFinite(v) && v >= 0);
+          const pSRM = srmPValue(nA, nB);
+          tests.push({ name: "Non-negativity", ok: nonNegOk });
+          tests.push({ name: "Sample Ratio Mismatch", ok: pSRM >= 0.01, detail: `p=${pSRM.toFixed(4)}` });
+          tests.push({ name: "CI finite", ok: Number.isFinite(ci.lo) && Number.isFinite(ci.hi) });
+          tests.push({ name: "Power computed", ok: Number.isFinite(powerVsMDE) });
+          const allTestsPass = tests.every((t) => t.ok);
+
+          // Biz impact (£)
+          const showsA = nA * rA * +inputs.funnel.showRateA;
+          const showsB = nB * rB * +inputs.funnel.showRateB;
+          const instrA = showsA * +inputs.funnel.instrRateA;
+          const instrB = showsB * +inputs.funnel.instrRateB;
+          const fee = +inputs.funnel.feePerInstructionGBP;
+          const revenueA = instrA * fee, revenueB = instrB * fee, incrRevenue = revenueB - revenueA;
+
+          // Decision
+          const decisionPass = ciExcludesZero && railsPass && allTestsPass;
+          let decision = decisionPass ? "SHIP" : "HOLD";
+          let note = "";
+
+          if (!decisionPass && powerVsMDE >= 0.8 && incrRevenue > 0 && railsPass && allTestsPass) {
+            decision = "PROVISIONAL SHIP";
+            note = "CI includes 0, but power ≥ 80% and £ impact positive. Roll out 10–25% with monitoring.";
+          }
+
+          if (pSRM < 0.05 && pSRM >= 0.01) {
+            decision = "HOLD";
+            note = "SRM borderline (p<0.05). Investigate source mix before concluding.";
+          }
+
+          // What-if
+          const pB_whatif = Math.min(Math.max(pA * (1 + whatIfLift), 0), 1);
+          const powerWhatIf = powerTwoProportions(pA, pB_whatif, whatIfUsersPerArm, whatIfUsersPerArm, 0.05);
+
+          return {
+            nA, nB, xA, xB, rA, rB, lift, ci, ciExcludesZero, powerVsMDE, pA, pB_expected,
+            tests, allTestsPass, rails, railsPass, allowMinor, minorCnt, decision, note,
+            revenueA, revenueB, incrRevenue, powerWhatIf,
+          };
+        }, [inputs, whatIfLift, whatIfUsersPerArm]);
+
+        function decisionSummary(d, inputs) {
+          const needMoreData = Number.isFinite(d.powerVsMDE) && d.powerVsMDE < 0.8;
+          const ciIncludes0 = !d.ciExcludesZero;
+          const moreLeads = (() => {
+            const pA = d.pA || 0, mde = inputs.priors.mde || 0.1; const targetPower = 0.8;
+            let n = Math.max(d.nA, d.nB);
+            for (let step = 0; step < 50; step++) {
+              const pB = Math.min(Math.max(pA * (1 + mde), 0), 1);
+              const pw = powerTwoProportions(pA, pB, n, n, 0.05);
+              if (pw >= targetPower) break; n = Math.ceil(n * 1.15);
+            }
+            return Math.max(0, n - Math.max(d.nA, d.nB));
+          })();
+
+          if (d.decision === "SHIP") return "High confidence improvement with all guardrails passing.";
+          if (d.decision === "PROVISIONAL SHIP") return "Positive £ impact and sufficient power despite CI including 0 — ship to 10–25% with monitoring.";
+          if (lowDataMode && d.lift > 0 && d.incrRevenue > 0 && (d.ci.hi ?? 0) > 0 && d.railsPass && d.allTestsPass)
+            return "Low-Data Mode: positive trend & £ impact; ship to a small cohort (10%) and re-evaluate in 2 weeks.";
+          if (needMoreData) return `Not reliable yet — collect about ~${fmtInt(moreLeads)} more users per arm for 80% power.`;
+          if (ciIncludes0) return "Trend is inconclusive — CI includes 0. Consider running longer or adjusting MDE.";
+          if (!d.railsPass) return "Guardrails breached — address operational risks before rollout.";
+          return "Hold pending test quality checks.";
+        }
+
+        function nextActions(d, inputs) {
+          const acts = [];
+          const pct = (x) => (Number.isFinite(x) ? `${(x * 100).toFixed(1)}%` : "—");
+          const over = (val, max) => (Number.isFinite(val) && Number.isFinite(max) ? (val - max) / Math.max(max, 1e-9) : 0);
+
+          // 1) Rollout guidance
+          if (d.lift > 0 && d.incrRevenue > 0 && d.ciExcludesZero) {
+            acts.push({
+              title: "Scale winning variant to 50–100%",
+              category: "Product/Experiment",
+              priority: "high",
+              owner: "Product",
+              due: "This week",
+              rationale: `Lift ${pct(d.lift)} with CI excluding 0 and +£${Math.round(d.incrRevenue).toLocaleString()} incremental.`,
+            });
+          } else if (d.lift > 0 && d.incrRevenue > 0 && !d.ciExcludesZero) {
+            acts.push({
+              title: "Directional ship to 10–25% with monitoring",
+              category: "Product/Experiment",
+              priority: "medium",
+              owner: "Product",
+              due: "This week",
+              rationale: `Positive trend (lift ${pct(d.lift)}), CI includes 0; power ${pct(d.powerVsMDE || 0)}.`,
+            });
+          }
+
+          // 2) Guardrail-specific remediations
+          const g = inputs.guardrailThresholds, o = inputs.observed;
+          if (o.invalidEnquiryRate > g.invalidEnquiryMax) {
+            const sev = over(o.invalidEnquiryRate, g.invalidEnquiryMax);
+            acts.push({
+              title: "Tighten lead validation and de-duplication",
+              category: "Compliance/Quality",
+              priority: sev > 0.25 ? "critical" : "high",
+              owner: "Ops",
+              due: "This week",
+              rationale: `Invalid enquiry rate ${pct(o.invalidEnquiryRate)} exceeds guardrail ${pct(g.invalidEnquiryMax)}.`,
+            });
+          }
+          if (o.unsubscribeRate > g.unsubscribeMax) {
+            acts.push({
+              title: "Pause outbound cadence & review templates",
+              category: "Compliance/Quality",
+              priority: "critical",
+              owner: "Marketing",
+              due: "Today",
+              rationale: `Unsubscribe/complaint ${pct(o.unsubscribeRate)} > max ${pct(g.unsubscribeMax)}.`,
+            });
+          } else if (o.unsubscribeRate > g.unsubscribeMax * 0.8) {
+            acts.push({
+              title: "Run content/consent audit on emails/SMS",
+              category: "Compliance/Quality",
+              priority: "medium",
+              owner: "Marketing",
+              due: "This week",
+              rationale: `Unsubscribe/complaint near limit (${pct(o.unsubscribeRate)} vs ${pct(g.unsubscribeMax)}).`,
+            });
+          }
+          if (o.portalFeedErrorRate > g.portalFeedErrorMax) {
+            acts.push({
+              title: "Fix portal feed integration errors",
+              category: "Integrations",
+              priority: "high",
+              owner: "Engineering",
+              due: "This week",
+              rationale: `Feed errors ${pct(o.portalFeedErrorRate)} > max ${pct(g.portalFeedErrorMax)} impact listing visibility.`,
+            });
+          }
+          if (o.p95LatencyMs > g.p95LatencyMaxMs) {
+            acts.push({
+              title: "Investigate p95 latency and cache hotspots",
+              category: "Engineering",
+              priority: "medium",
+              owner: "Engineering",
+              due: "This week",
+              rationale: `p95 latency ${Math.round(o.p95LatencyMs)}ms > max ${Math.round(g.p95LatencyMaxMs)}ms.`,
+            });
+          }
+          if (o.medianTimeToContactMin > g.medianTimeToContactMaxMin) {
+            acts.push({
+              title: "Enforce lead response SLA alerts",
+              category: "Operations/SLA",
+              priority: "high",
+              owner: "Sales Ops",
+              due: "This week",
+              rationale: `Median time-to-contact ${Math.round(o.medianTimeToContactMin)}m > max ${Math.round(g.medianTimeToContactMaxMin)}m.`,
+            });
+          }
+
+          // 3) Comparative funnel improvements
+          if (inputs.funnel.medianTimeToContactMinB < inputs.funnel.medianTimeToContactMinA) {
+            acts.push({
+              title: "Roll out faster response routing from variant",
+              category: "Operations/SLA",
+              priority: "medium",
+              owner: "Sales Ops",
+              due: "This week",
+              rationale: `Variant reduces median response from ${Math.round(inputs.funnel.medianTimeToContactMinA)}m → ${Math.round(inputs.funnel.medianTimeToContactMinB)}m.`,
+            });
+          }
+
+          // 4) Power / sample-size guidance
+          const targetPower = 0.8;
+          if ((d.powerVsMDE || 0) < targetPower) {
+            const pA = d.pA || 0, mde = inputs.priors.mde || 0.1;
+            let n = Math.max(d.nA, d.nB);
+            for (let step = 0; step < 50; step++) {
+              const pB = Math.min(Math.max(pA * (1 + mde), 0), 1);
+              const pw = powerTwoProportions(pA, pB, n, n, 0.05);
+              if (pw >= targetPower) break; n = Math.ceil(n * 1.15);
+            }
+            const add = Math.max(0, n - Math.max(d.nA, d.nB));
+            acts.push({
+              title: "Extend test / collect more samples",
+              category: "Product/Experiment",
+              priority: "medium",
+              owner: "Product",
+              due: "Next sprint",
+              rationale: `Power ${pct(d.powerVsMDE || 0)} < 80%. Collect ≈${Math.round(add)} more users per arm.`,
+            });
+          }
+
+          return acts;
+        }
+
+        function summaryText(d, inputs) {
+          return `Decision: ${d.decision}
+Lift: ${fmtPct(d.lift)}  CI95: [${fmtPct(d.ci.lo)}, ${fmtPct(d.ci.hi)}]  Power: ${fmtPct(d.powerVsMDE || 0)}
+£ Impact (est): ${fmtGBP(d.incrRevenue)}
+Guardrails: ${d.railsPass ? "PASS" : "ISSUES"} (minor=${d.minorCnt}, allow=${d.allowMinor})
+Note: ${d.note || decisionSummary(d, inputs)}
+`;
+        }
+
+        // ---- UI helpers ----
+        const passBadge = (ok, okText = "PASS", failText = "FAIL") => (
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${ok ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>{ok ? okText : failText}</span>
+        );
+        const guardBadge = (status) => {
+          const styles = { PASS: "bg-green-100 text-green-800", MINOR: "bg-amber-100 text-amber-800", FAIL: "bg-red-100 text-red-800" };
+          return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status]}`}>{status}</span>;
+        };
+        const numberInput = (label, path, step = "any", min = "0", hint) => {
+          const segs = path.split(".");
+          let val = inputs;
+          for (const s of segs) val = val[s];
+          return (
+            <label className="flex flex-col gap-1">
+              <span className="text-sm text-slate-600">{label} {hint && <span className="text-xs text-slate-400">({hint})</span>}</span>
+              <input type="number" inputMode="decimal" min={min} step={step} className="w-full rounded border border-slate-300 px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500" value={val} onChange={(e) => setField(path, e.target.value === "" ? "" : +e.target.value)} />
+            </label>
+          );
+        };
+        const selectInputValue = (path) => {
+          const segs = path.split(".");
+          let val = inputs;
+          for (const s of segs) val = val[s];
+          return val;
+        };
+        const setField = (path, value) => {
+          setInputs((prev) => {
+            const copy = clone(prev);
+            const segs = path.split(".");
+            let cur = copy;
+            for (let i = 0; i < segs.length - 1; i++) cur = cur[segs[i]];
+            cur[segs[segs.length - 1]] = value;
+            return copy;
+          });
+        };
+        const scrollToId = (id) => {
+          const el = document.getElementById(id);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        };
+
+        const hygiene = [
+          { name: "No early peeking (≥300/arm)", ok: Math.min(d.nA, d.nB) >= 300 },
+          { name: "Consistent targeting", ok: d.tests.every((t) => t.ok) },
+          { name: "One primary metric", ok: true },
+        ];
+
+        const decisionColor = d.decision === "SHIP" ? "bg-emerald-600" : d.decision === "PROVISIONAL SHIP" || d.decision === "DIRECTIONAL SHIP" ? "bg-amber-600" : "bg-slate-700";
+
+        const actions = nextActions(d, inputs);
+
+        return (
+          <div className="max-w-7xl mx-auto p-4 md:p-6">
+            {/* Sticky Top Nav */}
+            <div className="sticky top-0 z-30 -mx-4 md:-mx-6 px-4 md:px-6 py-2 bg-slate-50/80 backdrop-blur border-b border-slate-200 flex items-center gap-2 overflow-auto">
+              <button onClick={() => scrollToId("section-decision")} className="px-3 py-1.5 rounded bg-emerald-600 text-white text-sm font-medium">Decision</button>
+              <button onClick={() => scrollToId("section-tests")} className="px-3 py-1.5 rounded bg-slate-200 hover:bg-slate-300 text-sm">Tests</button>
+              <button onClick={() => scrollToId("section-conversion")} className="px-3 py-1.5 rounded bg-slate-200 hover:bg-slate-300 text-sm">Conversion</button>
+              <button onClick={() => scrollToId("section-guardrails")} className="px-3 py-1.5 rounded bg-slate-200 hover:bg-slate-300 text-sm">Guardrails</button>
+              <button onClick={() => scrollToId("section-impact")} className="px-3 py-1.5 rounded bg-slate-200 hover:bg-slate-300 text-sm">£ Impact</button>
+              <button onClick={() => scrollToId("section-actions")} className="px-3 py-1.5 rounded bg-slate-2 00 hover:bg-slate-300 text-sm">Actions</button>
+              <button onClick={() => scrollToId("section-inputs")} className="ml-auto px-3 py-1.5 rounded bg-blue-600 text-white text-sm font-medium">Inputs</button>
+            </div>
+
+            <header className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold">Experiment Decision Pad — v2.1 (Real Estate)</h1>
+                <p className="text-slate-600 mt-1">Plain-language decisions, Low-Data Mode, SRM check, presets, CSV import, action recommendations, hygiene checks, copyable summaries.</p>
+              </div>
+              <div className="flex items-center gap-4">
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={lowDataMode} onChange={(e) => setLowDataMode(e.target.checked)} />
+                  Low-Data Mode (directional)
+                </label>
+                <button className="text-xs px-2 py-1 rounded border border-slate-300" onClick={() => navigator.clipboard?.writeText(summaryText(d, inputs))} title="Copy a plain-text summary to clipboard">Copy Summary</button>
+              </div>
+            </header>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* LEFT: Inputs */}
+              <section id="section-inputs" className="bg-white rounded-lg shadow border border-slate-200 p-4 md:p-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold mb-2">Inputs</h2>
+                  <div className="flex items-center gap-2">
+                    {presets.map((p) => (
+                      <button key={p.name} onClick={p.apply} className="text-xs px-2 py-1 rounded border border-slate-300 hover:bg-slate-50">{p.name}</button>
+                    ))}
+                  </div>
+                </div>
+
+                <details open={open.traffic} onToggle={(e) => setOpen((o) => ({ ...o, traffic: e.target.open }))} className="mb-4">
+                  <summary className="cursor-pointer font-medium select-none flex items-center justify-between">
+                    <span>Traffic</span>
+                    <span className="text-xs text-slate-500">A/B users & conversions</span>
+                  </summary>
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium mb-2">A (Control)</h3>
+                        <CSVLoader onLoad={(rows) => {
+                          const r = rows[0] || {};
+                          const aUsers = +r.a_users || +r.users_a || +r.users || 0;
+                          const aConv = +r.a_conv || +r.conv_a || +r.conv || 0;
+                          setInputs((prev) => ({ ...prev, traffic: { A: { ...prev.traffic.A, users: aUsers, convCount: aConv }, B: { ...prev.traffic.B } } }));
+                        }} />
+                      </div>
+                      <div className="grid gap-3">
+                        {numberInput("Users (A)", "traffic.A.users", 1, "0")}
+                        {numberInput("Conversions (A)", "traffic.A.convCount", 1, "0")}
+                        {numberInput("Revenue / User (A)", "traffic.A.revenuePerUser", "any", "0")}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium mb-2">B (Variant)</h3>
+                        <CSVLoader onLoad={(rows) => {
+                          const r = rows[0] || {};
+                          const bUsers = +r.b_users || +r.users_b || 0;
+                          const bConv = +r.b_conv || +r.conv_b || 0;
+                          setInputs((prev) => ({ ...prev, traffic: { A: { ...prev.traffic.A }, B: { ...prev.traffic.B, users: bUsers, convCount: bConv } } }));
+                        }} />
+                      </div>
+                      <div className="grid gap-3">
+                        {numberInput("Users (B)", "traffic.B.users", 1, "0")}
+                        {numberInput("Conversions (B)", "traffic.B.convCount", 1, "0")}
+                        {numberInput("Revenue / User (B)", "traffic.B.revenuePerUser", "any", "0")}
+                      </div>
+                    </div>
+                  </div>
+                </details>
+
+                <details open={open.priors} onToggle={(e) => setOpen((o) => ({ ...o, priors: e.target.open }))} className="mb-4">
+                  <summary className="cursor-pointer font-medium select-none flex items-center justify-between">
+                    <span>Priors</span>
+                    <span className="text-xs text-slate-500">MDE & Risk Appetite</span>
+                  </summary>
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {numberInput("MDE (fractional lift)", "priors.mde", "any", "0", "e.g., 0.10 = 10%")}
+                    <label className="flex flex-col gap-1">
+                      <span className="text-sm text-slate-600">Risk Appetite</span>
+                      <select className="w-full rounded border border-slate-300 px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500" value={selectInputValue("priors.riskAppetite")} onChange={(e) => setRiskAppetite(e.target.value)}>
+                        {["low", "medium", "high"].map((o) => (
+                          <option key={o} value={o}>{o}</option>
+                        ))}
+                      </select>
+                      <span className="text-xs text-slate-500">Sets suggested MDE and allowed minor guardrail breaches automatically.</span>
+                    </label>
+                  </div>
+                </details>
+
+                <details open={open.observed} onToggle={(e) => setOpen((o) => ({ ...o, observed: e.target.open }))} className="mb-4">
+                  <summary className="cursor-pointer font-medium select-none flex items-center justify-between">
+                    <span>Observed Guardrails</span>
+                    <span className="text-xs text-slate-500">Bounce, latency, complaints, etc.</span>
+                  </summary>
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {numberInput("Bounce Rate (0–1)", "observed.bounceRate", "any", "0")}
+                    {numberInput("p95 Latency (ms)", "observed.p95LatencyMs", 1, "0")}
+                    {numberInput("Churn Lift (0–1)", "observed.churnLift", "any", "0")}
+                    {numberInput("Median Time-to-Contact (min)", "observed.medianTimeToContactMin", 1, "0")}
+                    {numberInput("Invalid Enquiry Rate (0–1)", "observed.invalidEnquiryRate", "any", "0")}
+                    {numberInput("Valuation Cancel Rate (0–1)", "observed.valuationCancelRate", "any", "0")}
+                    {numberInput("Unsubscribe/Complaint Rate (0–1)", "observed.unsubscribeRate", "any", "0")}
+                    {numberInput("Portal Feed Error Rate (0–1)", "observed.portalFeedErrorRate", "any", "0")}
+                    {numberInput("AML/KYC Drop-off Lift (Δ)", "observed.amlKycDropoffLift", "any", "0")}
+                  </div>
+                </details>
+
+                <details open={open.thresholds} onToggle={(e) => setOpen((o) => ({ ...o, thresholds: e.target.open }))} className="mb-4">
+                  <summary className="cursor-pointer font-medium select-none flex items-center justify-between">
+                    <span>Guardrail Thresholds (Max)</span>
+                    <span className="text-xs text-slate-500">Set targets</span>
+                  </summary>
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {numberInput("Bounce Max (0–1)", "guardrailThresholds.bounceMax", "any", "0")}
+                    {numberInput("p95 Latency Max (ms)", "guardrailThresholds.p95LatencyMaxMs", 1, "0")}
+                    {numberInput("Churn Lift Max (0–1)", "guardrailThresholds.churnLiftMax", "any", "0")}
+                    {numberInput("Median Time-to-Contact Max (min)", "guardrailThresholds.medianTimeToContactMaxMin", 1, "0")}
+                    {numberInput("Invalid Enquiry Max (0–1)", "guardrailThresholds.invalidEnquiryMax", "any", "0")}
+                    {numberInput("Valuation Cancel Max (0–1)", "guardrailThresholds.valuationCancelMax", "any", "0")}
+                    {numberInput("Unsubscribe/Complaint Max (0–1)", "guardrailThresholds.unsubscribeMax", "any", "0")}
+                    {numberInput("Portal Feed Error Max (0–1)", "guardrailThresholds.portalFeedErrorMax", "any", "0")}
+                    {numberInput("AML/KYC Drop-off Max Lift (Δ)", "guardrailThresholds.amlKycDropoffMaxLift", "any", "0")}
+                  </div>
+                </details>
+
+                <details open={open.funnel} onToggle={(e) => setOpen((o) => ({ ...o, funnel: e.target.open }))}>
+                  <summary className="cursor-pointer font-medium select-none flex items-center justify-between">
+                    <span>Funnel Inputs</span>
+                    <span className="text-xs text-slate-500">Show, instruction, fee</span>
+                  </summary>
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {numberInput("Show Rate A (0–1)", "funnel.showRateA", "any", "0")}
+                    {numberInput("Show Rate B (0–1)", "funnel.showRateB", "any", "0")}
+                    {numberInput("Instruction Rate A (0–1)", "funnel.instrRateA", "any", "0")}
+                    {numberInput("Instruction Rate B (0–1)", "funnel.instrRateB", "any", "0")}
+                    {numberInput("Fee per Instruction (£)", "funnel.feePerInstructionGBP", "any", "0")}
+                    {numberInput("Median Time-to-Contact A (min)", "funnel.medianTimeToContactMinA", 1, "0")}
+                    {numberInput("Median Time-to-Contact B (min)", "funnel.medianTimeToContactMinB", 1, "0")}
+                  </div>
+                </details>
+              </section>
+
+              {/* RIGHT: Results & Decision */}
+              <section className="bg-white rounded-lg shadow border border-slate-200 p-0 md:p-0 overflow-hidden">
+                {/* Sticky Decision Bar */}
+                <div id="section-decision" className="sticky top-10 md:top-12 z-20 bg-white border-b border-slate-200 p-4 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs uppercase tracking-wide text-slate-500">Decision</div>
+                    <div className="text-sm text-slate-600">Logic {inputs.logicVersion} • Risk: <span className="font-mono">{inputs.priors.riskAppetite}</span></div>
+                  </div>
+                  <div className={`px-3 py-1.5 rounded text-white font-semibold ${decisionColor}`}>{d.decision}</div>
+                </div>
+
+                {/* Body */}
+                <div className="p-4 md:p-6 space-y-6">
+                  {/* Tests Gate */}
+                  <div id="section-tests" className="flex items-center justify-between">
+                    <h2 className="text-lg font-semibold">Tests Gate</h2>
+                    {passBadge(d.allTestsPass, d.allTestsPass ? "ALL CHECKS PASS" : "CHECKS FAIL")}
+                  </div>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {d.tests.map((t, i) => (
+                      <li key={i} className="flex items-center justify-between gap-2 rounded border border-slate-200 px-3 py-2 text-sm">
+                        <span>
+                          {t.name}
+                          {t.detail ? <span className="text-slate-500"> — {t.detail}</span> : null}
+                        </span>
+                        {passBadge(t.ok)}
+                      </li>
+                    ))}
+                  </ul>
+
+                  {/* Hygiene */}
+                  <div className="rounded border border-slate-200 p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium">Hygiene Checks</h3>
+                    </div>
+                    <ul className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
+                      {hygiene.map((h, i) => (
+                        <li key={i} className="flex items-center justify-between gap-2 rounded border border-slate-200 px-3 py-2">
+                          <span>{h.name}</span>
+                          {passBadge(h.ok)}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Conversion & Power */}
+                  <div id="section-conversion" className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div className="rounded border border-slate-200 p-3 lg:col-span-2">
+                      <h3 className="font-medium mb-3">Conversion & Lift</h3>
+                      <div className="text-sm grid gap-1">
+                        <div>Conv Rate A: <span className="font-mono">{fmtPct(d.rA)}</span> ({fmtInt(d.xA)}/{fmtInt(d.nA)})</div>
+                        <div>Conv Rate B: <span className="font-mono">{fmtPct(d.rB)}</span> ({fmtInt(d.xB)}/{fmtInt(d.nB)})</div>
+                        <div>Lift (B vs A): <span className={`font-mono ${d.lift > 0 ? "text-green-700" : d.lift < 0 ? "text-red-700" : ""}`}>{fmtPct(d.lift)}</span></div>
+                        <div>CI (95% AC, pB−pA): <span className="font-mono">[{fmtPct(d.ci.lo)}, {fmtPct(d.ci.hi)}]</span> {passBadge(d.ciExcludesZero, "EXCLUDES 0", "INCLUDES 0")}</div>
+                      </div>
+                    </div>
+                    <div className="rounded border border-slate-200 p-3">
+                      <h3 className="font-medium mb-3">Power</h3>
+                      <div className="text-sm grid gap-2">
+                        <div>MDE: <span className="font-mono">{fmtPct(inputs.priors.mde)}</span></div>
+                        <div>Power vs MDE: <span className="font-mono">{fmtPct(d.powerVsMDE || 0)}</span></div>
+                        <div className="w-full bg-slate-200 h-2 rounded"><div className="bg-blue-600 h-2 rounded" style={{ width: `${Math.max(0, Math.min(100, (d.powerVsMDE || 0) * 100))}%` }} /></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* What-if Power */}
+                  <div className="rounded border border-slate-200 p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium">What-if: Power Estimate</h3>
+                      <div className="text-sm">Power: <span className="font-mono">{fmtPct(d.powerWhatIf || 0)}</span></div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                      <label className="flex flex-col gap-1">
+                        <span className="text-slate-600">Users per arm</span>
+                        <input type="number" className="rounded border border-slate-300 px-2 py-1.5" value={whatIfUsersPerArm} min={0} step={100} onChange={(e) => setWhatIfUsersPerArm(Math.max(0, +e.target.value || 0))} />
+                      </label>
+                      <label className="flex flex-col gap-1">
+                        <span className="text-slate-600">Assumed lift (fraction)</span>
+                        <input type="number" className="rounded border border-slate-300 px-2 py-1.5" value={whatIfLift} step="any" onChange={(e) => setWhatIfLift(+e.target.value || 0)} />
+                      </label>
+                      <div className="flex items-end">
+                        <div className="text-slate-600">MDE baseline pA = <span className="font-mono">{fmtPct(d.pA)}</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Guardrails */}
+                  <div id="section-guardrails" className="rounded border border-slate-200 p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium">Guardrails</h3>
+                      <div className="text-sm">Allowed MINOR: <span className="font-mono">{d.allowMinor}</span> • MINOR Count: <span className="font-mono">{d.minorCnt}</span> {passBadge(d.railsPass)}</div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 text-sm">
+                      {d.rails.map((g) => (
+                        <div key={g.k} className="rounded border border-slate-200 p-3 h-full">
+                          <div className="flex items-start gap-2">
+                            <span className="font-medium break-words leading-snug">{g.label}{g.hard ? " • hard" : ""}</span>
+                            <div className="ml-auto shrink-0">{guardBadge(g.status)}</div>
+                          </div>
+                          <div className="mt-1">Observed: <span className="font-mono">{g.unit === "ms" || g.unit === "min" ? `${fmtInt(g.val)} ${g.unit}` : fmtPct(g.val)}</span></div>
+                          <div>Max: <span className="font-mono">{g.unit === "ms" || g.unit === "min" ? `${fmtInt(g.max)} ${g.unit}` : fmtPct(g.max)}</span> • Minor ≤ <span className="font-mono">{g.unit === "ms" || g.unit === "min" ? `${fmtInt(g.max * 1.1)} ${g.unit}` : fmtPct(g.max * 1.1)}</span></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* £ Impact */}
+                  <div id="section-impact" className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="rounded border border-slate-200 p-3">
+                      <h3 className="font-medium mb-3">Funnel Quality</h3>
+                      <div className="text-sm grid gap-1">
+                        <div>Show Rate A/B: <span className="font-mono">{fmtPct(inputs.funnel.showRateA)} / {fmtPct(inputs.funnel.showRateB)}</span></div>
+                        <div>Instruction Rate A/B: <span className="font-mono">{fmtPct(inputs.funnel.instrRateA)} / {fmtPct(inputs.funnel.instrRateB)}</span></div>
+                        <div>Median Time-to-Contact A/B: <span className="font-mono">{fmtInt(inputs.funnel.medianTimeToContactMinA)} / {fmtInt(inputs.funnel.medianTimeToContactMinB)} min</span></div>
+                        <div>Fee per Instruction: <span className="font-mono">{fmtGBP(inputs.funnel.feePerInstructionGBP)}</span></div>
+                      </div>
+                    </div>
+                    <div className="rounded border border-slate-200 p-3">
+                      <h3 className="font-medium mb-3">Estimated Revenue Impact</h3>
+                      <div className="text-sm grid gap-2">
+                        <div>Revenue A: <span className="font-mono">{fmtGBP(d.revenueA)}</span></div>
+                        <div>Revenue B: <span className="font-mono">{fmtGBP(d.revenueB)}</span></div>
+                        <div>Incremental (B−A): <span className={`font-mono ${d.incrRevenue >= 0 ? "text-green-700" : "text-red-700"}`}>{fmtGBP(d.incrRevenue)}</span></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div id="section-actions" className="rounded border border-slate-200 p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-medium">Recommended Actions</h3>
+                      <div className="text-xs text-slate-500">Auto-derived from decision, guardrails and power</div>
+                    </div>
+                    {actions.length === 0 ? (
+                      <div className="text-sm text-slate-600">No actions recommended based on current inputs.</div>
+                    ) : (
+                      <ul className="grid grid-cols-1 lg:grid-cols-2 gap-2 text-sm">
+                        {actions.map((a, i) => (
+                          <li key={i} className="rounded border border-slate-200 p-3">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium">{a.title}</span>
+                              <span className="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-xs bg-slate-100 text-slate-700">{a.priority}</span>
+                            </div>
+                            <div className="mt-1 text-slate-600">{a.category} • Owner: {a.owner} • Due: {a.due}</div>
+                            <div className="mt-1 text-slate-700">{a.rationale}</div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  {/* Decision rationale */}
+                  <div className="rounded border border-slate-200 p-3 bg-slate-50">
+                    <h3 className="font-medium mb-1">Plain-language summary</h3>
+                    <p className="text-sm text-slate-700 whitespace-pre-wrap">{d.note || decisionSummary(d, inputs)}</p>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<ExperimentDecisionPad_v2_1 />);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,627 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Landlord & Vendor Health Tracker - AGI Automations</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            agi: {
+              primary: '#4338ca', // Indigo 700
+              accent: '#6366f1',  // Indigo 500
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    body { background-color: #f8fafc; color: #0f172a; }
+    
+    /* Code editor look for the textarea */
+    .code-editor {
+      font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+      font-size: 0.75rem;
+      line-height: 1.5;
+      background-color: #ffffff;
+      color: #334155;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased selection:bg-indigo-100 selection:text-indigo-800 pb-20">
+  <div id="app"></div>
+
+  <!-- React & Babel -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useMemo, useState, useEffect, useRef } = React;
+
+    // ---------- Utilities ----------
+    const fmt = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 });
+
+    const monthsBetween = (startISO, endISO) => {
+      try {
+        const s = new Date(startISO), e = new Date(endISO);
+        let months = (e.getFullYear() - s.getFullYear()) * 12 + (e.getMonth() - s.getMonth());
+        if (e.getDate() < s.getDate()) months -= 1;
+        return Math.max(0, months);
+      } catch { return 0; }
+    };
+
+    const daysBetween = (aISO, bISO) => {
+      try { return Math.round((new Date(bISO) - new Date(aISO)) / (1000*60*60*24)); } catch { return 0; }
+    };
+
+    const todayISO = () => new Date().toISOString().slice(0,10);
+
+    const stableStringify = (obj) => {
+      if (obj === null || typeof obj !== 'object') return JSON.stringify(obj);
+      if (Array.isArray(obj)) return '[' + obj.map(stableStringify).join(',') + ']';
+      const keys = Object.keys(obj).sort();
+      return '{' + keys.map(k => JSON.stringify(k) + ':' + stableStringify(obj[k])).join(',') + '}';
+    };
+
+    const hashString = (str) => {
+      let h = 5381;
+      for (let i = 0; i < str.length; i++) { h = ((h << 5) + h) + str.charCodeAt(i); h |= 0; }
+      return (h >>> 0).toString(16);
+    };
+
+    const mean = (arr) => arr.reduce((a,b)=>a+b,0) / (arr.length || 1);
+    const std = (arr) => {
+      const m = mean(arr); const v = mean(arr.map(x => (x - m) ** 2)); return Math.sqrt(v);
+    };
+
+    const zScores = (arr) => {
+      const s = std(arr); const m = mean(arr);
+      if (!isFinite(s) || s === 0) return arr.map(()=>0);
+      return arr.map(x => (x - m) / s);
+    };
+
+    const minMaxToSigned = (arr) => {
+      const min = Math.min(...arr), max = Math.max(...arr);
+      if (min === max) return arr.map(()=>0);
+      return arr.map(x => ( (x - min) / (max - min) ) * 2 - 1);
+    };
+
+    const downloadBlob = (content, filename, contentType) => {
+      const blob = new Blob([content], { type: contentType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename; a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // ---------- Sample Data (Realistic Estate Agency Metrics) ----------
+    const sampleAccounts = [
+      {
+        name: 'Mr & Mrs Patel — 3 Units', fee: 4200, segment: 'Standard',
+        startDateISO: '2022-05-15', renewalDateISO: '2025-10-10',
+        lastContactDays: 62, maintenanceCount: 1, sentiment: 9, owner: 'Alice Ng'
+      },
+      {
+        name: 'Acorn Estates Ltd', fee: 7800, segment: 'Key Account',
+        startDateISO: '2021-03-01', renewalDateISO: '2025-09-20',
+        lastContactDays: 30, maintenanceCount: 4, sentiment: 6, owner: 'Ben Fox'
+      },
+      {
+        name: 'Dr. Khan — Single BTL', fee: 1200, segment: 'Standard',
+        startDateISO: '2024-02-01', renewalDateISO: '2026-02-01',
+        lastContactDays: 120, maintenanceCount: 2, sentiment: 7, owner: 'Alice Ng'
+      },
+      {
+        name: 'Riverside Holdings', fee: 15000, segment: 'VIP',
+        startDateISO: '2019-09-12', renewalDateISO: '2025-11-01',
+        lastContactDays: 14, maintenanceCount: 6, sentiment: 5, owner: 'Ben Fox'
+      },
+      {
+        name: 'Greenwood Family Trust', fee: 9600, segment: 'Key Account',
+        startDateISO: '2020-06-01', renewalDateISO: '2026-06-01',
+        lastContactDays: 45, maintenanceCount: 0, sentiment: 10, owner: 'Cara Li'
+      },
+      {
+        name: 'Hudson Developers', fee: 5400, segment: 'Key Account',
+        startDateISO: '2023-01-10', renewalDateISO: '2025-10-30',
+        lastContactDays: 90, maintenanceCount: 3, sentiment: 4, owner: 'Cara Li'
+      },
+      {
+        name: 'Tom & Ava — HMO', fee: 3600, segment: 'Standard',
+        startDateISO: '2022-09-02', renewalDateISO: '2025-09-28',
+        lastContactDays: 42, maintenanceCount: 5, sentiment: 3, owner: 'Alice Ng'
+      },
+      {
+        name: 'Northbay Capital', fee: 18000, segment: 'VIP',
+        startDateISO: '2018-12-20', renewalDateISO: '2026-01-15',
+        lastContactDays: 5, maintenanceCount: 2, sentiment: 8, owner: 'Ben Fox'
+      }
+    ];
+
+    const sampleWeights = { lastContact: 0.4, maintenance: 0.25, sentiment: 0.25, tenure: 0.1 };
+
+    // Dynamic Action Generator
+    const getActionPlan = (driver, data) => {
+        switch(driver) {
+            case 'lastContact':
+                return {
+                    label: 'Ghost Risk',
+                    color: 'text-amber-700',
+                    advice: [
+                        `Silence check: Not spoken in ${data.lastContactDays} days.`,
+                        `Call today. Script: "Just checking your portfolio performance vs local market."`
+                    ]
+                };
+            case 'maintenance':
+                return {
+                    label: 'Maintenance Fatigue',
+                    color: 'text-red-700',
+                    advice: [
+                        `${data.maintenanceCount} open issues causing friction.`,
+                        `Review Contractor Logs. If >10 days, escalate to Director.`
+                    ]
+                };
+            case 'sentiment':
+                return {
+                    label: 'Sentiment Drop',
+                    color: 'text-rose-700',
+                    advice: [
+                        `Rated ${data.sentiment}/10 by agent. Subjective risk high.`,
+                        `Book "Relationship Reset" meeting. Do NOT discuss fees.`
+                    ]
+                };
+            case 'tenure':
+                return {
+                    label: 'Loyalty Risk',
+                    color: 'text-indigo-700',
+                    advice: [
+                        `Approaching ${Math.floor(data.tenureMonths/12)}yr anniversary.`,
+                        `Competitors will target now. Send "Value Delivered" report.`
+                    ]
+                };
+            default:
+                return { label: 'General Review', color: 'text-slate-600', advice: ['Standard quarterly review.'] };
+        }
+    };
+
+    // ---------- Core Scoring Logic (Updated) ----------
+    function computeScores({ accounts, weights }) {
+      const nowISO = todayISO();
+      const hasFew = accounts.length < 8;
+
+      const tenureMonthsArr = accounts.map(a => monthsBetween(a.startDateISO, nowISO));
+      const contactArr = accounts.map(a => +a.lastContactDays || 0);
+      const maintArr = accounts.map(a => +a.maintenanceCount || 0);
+      const sentimentArr = accounts.map(a => +a.sentiment || 0);
+
+      const scaleFn = hasFew ? minMaxToSigned : zScores;
+
+      // SCORING LOGIC INVERSION:
+      // High Contact Days = BAD (Negative Score)
+      // High Maintenance = BAD (Negative Score)
+      // High Sentiment = GOOD (Positive Score)
+      let z_contact = scaleFn(contactArr).map(v => -v); 
+      let z_maint = scaleFn(maintArr).map(v => -v);
+      let z_sentiment = scaleFn(sentimentArr);
+      let z_tenure = scaleFn(tenureMonthsArr);
+
+      const w = { ...weights };
+      const wSum = Object.values(w).reduce((a,b)=>a+Math.abs(+b||0), 0) || 1;
+
+      const rows = accounts.map((a, i) => {
+        const contrib = {
+          lastContact: (+w.lastContact||0) * z_contact[i],
+          maintenance: (+w.maintenance||0) * z_maint[i],
+          sentiment: (+w.sentiment||0) * z_sentiment[i],
+          tenure: (+w.tenure||0) * z_tenure[i]
+        };
+        const raw = contrib.lastContact + contrib.maintenance + contrib.sentiment + contrib.tenure;
+        const score = raw / wSum;
+        const dominant = Object.entries(contrib).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]))[0][0];
+        
+        return {
+          ...a,
+          tenureMonths: tenureMonthsArr[i],
+          score,
+          dominant,
+          actionPlan: getActionPlan(dominant, a) // Generate dynamic plan
+        };
+      });
+
+      const tierOf = (s) => s >= 0.6 ? 'Green' : (s <= -0.2 ? 'Red' : 'Amber');
+
+      const riskRows = rows
+        .map(r => ({ name: r.name, fee: +r.fee||0, score: r.score, owner: r.owner, renewalDateISO: r.renewalDateISO }))
+        .map(r => ({ ...r, risk: (-r.score) * (r.fee || 0) }))
+        .sort((a,b) => b.risk - a.risk);
+
+      rows.forEach(r => {
+        const daysToRenewal = daysBetween(nowISO, r.renewalDateISO);
+        r.daysToRenewal = daysToRenewal;
+        r.p1 = (daysToRenewal <= 60) && (r.score < 0);
+        r.tier = tierOf(r.score);
+      });
+
+      return { rows, riskRows };
+    }
+
+    function runTests({ rows, riskRows }) {
+      const tests = [];
+      const missingOwner = rows.filter(r => !r.owner || !String(r.owner).trim());
+      tests.push({ name: 'Owner assignment check', pass: missingOwner.length === 0, details: missingOwner.map(r=>r.name) });
+      
+      const p1s = rows.filter(r => r.p1);
+      tests.push({ name: 'Renewal Risk Logic (≤60d + Low Health)', pass: p1s.length >= 0, details: p1s.map(r=>r.name) });
+      return tests;
+    }
+
+    const BASELINE_KEY = 'lvht.baseline.v2';
+    function loadBaseline() { try { return JSON.parse(localStorage.getItem(BASELINE_KEY) || 'null'); } catch { return null; } }
+    function saveBaseline(baseline) { localStorage.setItem(BASELINE_KEY, JSON.stringify(baseline)); }
+    function clearBaseline() { localStorage.removeItem(BASELINE_KEY); }
+    function buildBaseline(rows) {
+      const canon = stableStringify(rows.map(r => ({ name: r.name }))); // Simpler baseline hash
+      const hash = hashString(canon);
+      const snapshot = rows.map(r => ({ name: r.name, score: r.score, tier: r.tier }));
+      const when = new Date().toISOString();
+      return { hash, when, snapshot };
+    }
+    function diffTiers(prev, curr) {
+      const prevMap = new Map(prev.snapshot.map(x => [x.name, x.tier]));
+      return curr.rows.map(r => ({ name: r.name, from: prevMap.get(r.name) || '—', to: r.tier, movement: movement(prevMap.get(r.name), r.tier) }))
+        .filter(x => x.movement !== 'Same');
+    }
+    function movement(a, b) {
+      const rank = (t) => t === 'Red' ? 0 : (t === 'Amber' ? 1 : (t === 'Green' ? 2 : 1));
+      if (!a) return 'New';
+      const d = rank(b) - rank(a);
+      return d > 0 ? 'Up' : (d < 0 ? 'Down' : 'Same');
+    }
+
+    // ---------- Components ----------
+    const Badge = ({ children, color }) => {
+      const colors = {
+        red: 'bg-red-100 text-red-800 border-red-200',
+        amber: 'bg-amber-100 text-amber-800 border-amber-200',
+        emerald: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+        slate: 'bg-slate-100 text-slate-800 border-slate-200',
+        indigo: 'bg-indigo-100 text-indigo-800 border-indigo-200'
+      };
+      return (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colors[color] || colors.slate}`}>
+          {children}
+        </span>
+      );
+    };
+
+    const Card = ({ title, children, action }) => (
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden h-full">
+        {title && (
+          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+            <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-wide">{title}</h3>
+            {action}
+          </div>
+        )}
+        <div className="p-6">{children}</div>
+      </div>
+    );
+
+    // ---------- Main App ----------
+    function App() {
+      const [accountsJSON, setAccountsJSON] = useState(JSON.stringify(sampleAccounts, null, 2));
+      const [weights, setWeights] = useState(sampleWeights);
+      const [logicVersion, setLogicVersion] = useState('agency_v2');
+      const [result, setResult] = useState(null);
+      const [tests, setTests] = useState([]);
+      const [filterAtRisk, setFilterAtRisk] = useState(false);
+      const [search, setSearch] = useState('');
+      const [baseline, setBaseline] = useState(loadBaseline());
+
+      const run = () => {
+        let accounts = [];
+        try {
+          accounts = JSON.parse(accountsJSON);
+          if (!Array.isArray(accounts)) throw new Error('Accounts must be an array');
+        } catch (e) {
+          alert('Invalid JSON in accounts. Expect an array.\n' + e.message);
+          return;
+        }
+        const { rows, riskRows } = computeScores({ accounts, weights });
+        const r = { rows, riskRows, runAt: new Date().toISOString(), logicVersion };
+        setResult(r);
+        setTests(runTests(r));
+      };
+
+      useEffect(() => { run(); }, []);
+
+      const saveAsBaseline = () => {
+        if (!result) return;
+        const base = buildBaseline(result.rows);
+        saveBaseline(base);
+        setBaseline(base);
+      };
+
+      const exportCSV = () => {
+        if (!result) return;
+        const headers = ['name','fee','segment','owner','score','tier','dominant','tenureMonths','lastContactDays','maintenanceCount','sentiment','daysToRenewal','p1'];
+        const lines = [headers.join(',')].concat(
+          result.rows.map(r => headers.map(h => {
+            const v = (h === 'score') ? r.score.toFixed(3)
+                    : (h === 'fee') ? r.fee
+                    : (r[h] !== undefined ? r[h] : '');
+            return JSON.stringify(v);
+          }).join(','))
+        );
+        downloadBlob(lines.join('\n'), 'landlord_health_export.csv', 'text/csv');
+      };
+
+      const clearBase = () => { clearBaseline(); setBaseline(null); };
+
+      const ownerSummary = useMemo(() => {
+        if (!result) return [];
+        const byOwner = new Map();
+        result.rows.forEach(r => {
+          const o = r.owner || 'Unassigned';
+          const v = byOwner.get(o) || { owner: o, total: 0, reds: 0, p1s: 0 };
+          v.total++; if (r.tier === 'Red') v.reds++; if (r.p1) v.p1s++;
+          byOwner.set(o, v);
+        });
+        return Array.from(byOwner.values()).sort((a,b)=> b.reds - a.reds);
+      }, [result]);
+
+      const filteredRows = useMemo(() => {
+        if (!result) return [];
+        let rows = result.rows;
+        if (filterAtRisk) rows = rows.filter(r => r.tier !== 'Green');
+        if (search.trim()) rows = rows.filter(r => r.name.toLowerCase().includes(search.toLowerCase()));
+        return rows.sort((a,b)=> a.score - b.score);
+      }, [result, filterAtRisk, search]);
+
+      const getTierColor = (t) => t === 'Green' ? 'emerald' : (t === 'Amber' ? 'amber' : 'red');
+
+      return (
+        <div className="max-w-7xl mx-auto p-4 md:p-6">
+          
+          {/* Sticky Nav */}
+          <div className="sticky top-0 z-30 -mx-4 md:-mx-6 px-4 md:px-6 py-3 bg-slate-50/90 backdrop-blur border-b border-slate-200 flex items-center gap-2 overflow-x-auto hide-scrollbar mb-6 shadow-sm">
+            <span className="font-bold text-slate-700 mr-2 shrink-0">AGI Automations</span>
+            <div className="h-4 w-px bg-slate-300 mx-2"></div>
+            <button onClick={run} className="shrink-0 px-3 py-1.5 rounded-full bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">
+              <i className="fa-solid fa-play mr-1"></i> Run Model
+            </button>
+            <div className="ml-auto flex gap-2">
+               <button onClick={exportCSV} className="shrink-0 px-3 py-1.5 rounded border border-slate-300 bg-white text-slate-600 text-xs font-medium hover:bg-slate-50 shadow-sm">
+                <i className="fa-solid fa-file-csv mr-1"></i> CSV
+              </button>
+              <button onClick={saveAsBaseline} className="shrink-0 px-3 py-1.5 rounded border border-slate-300 bg-white text-slate-600 text-xs font-medium hover:bg-slate-50 shadow-sm">
+                <i className="fa-solid fa-floppy-disk mr-1"></i> Save Base
+              </button>
+            </div>
+          </div>
+
+          <header className="mb-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 mb-2">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-indigo-100 text-indigo-800 border border-indigo-200">Customer Health</span>
+                  <span className="text-slate-400 text-xs">{new Date().toLocaleDateString()}</span>
+                </div>
+                <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Landlord Health Tracker</h1>
+                <p className="text-slate-500 mt-1 text-lg">Retention & Renewal Risk Analysis</p>
+              </div>
+              <div className="text-right text-xs text-slate-400">
+                Logic Version: <span className="font-mono text-slate-600">{logicVersion}</span>
+              </div>
+            </div>
+          </header>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Left Col: Config */}
+            <div className="lg:col-span-1 space-y-6">
+              <Card title="Data Input">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 uppercase mb-2">Portfolio Data (JSON)</label>
+                    <textarea value={accountsJSON} onChange={e=>setAccountsJSON(e.target.value)} rows={12} className="w-full code-editor rounded border border-slate-300 p-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-y"></textarea>
+                    <div className="mt-2 text-[10px] text-slate-400">
+                        Required fields: name, fee, lastContactDays, maintenanceCount, sentiment (1-10)
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 uppercase mb-2">Driver Weights</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      {['lastContact','maintenance','sentiment','tenure'].map(k => (
+                        <div key={k}>
+                          <span className="text-xs text-slate-400 capitalize">{k.replace(/([A-Z])/g, ' $1').trim()}</span>
+                          <input type="number" step="0.05" value={weights[k]} onChange={e=>setWeights({ ...weights, [k]: parseFloat(e.target.value||'0') })} className="w-full rounded border border-slate-300 px-2 py-1 text-sm focus:ring-1 focus:ring-indigo-500" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex justify-end pt-2">
+                    <button onClick={()=>{setAccountsJSON(JSON.stringify(sampleAccounts, null, 2)); setWeights(sampleWeights);}} className="text-xs text-slate-500 hover:text-indigo-600 underline">Reset to Sample Data</button>
+                  </div>
+                </div>
+              </Card>
+
+              {baseline && (
+                <Card title="Baseline Changes">
+                  <div className="text-xs text-slate-600 mb-2">
+                    Baseline Hash: <span className="font-mono bg-slate-100 px-1 rounded">{baseline.hash.substring(0,8)}...</span>
+                  </div>
+                  {result && (
+                    <ul className="space-y-1 max-h-40 overflow-y-auto">
+                      {diffTiers(baseline, result).length === 0 ? (
+                        <li className="text-slate-400 italic text-sm">No tier changes detected.</li>
+                      ) : (
+                        diffTiers(baseline, result).map((d,i)=>(
+                          <li key={i} className="text-sm flex justify-between items-center border-b border-slate-50 pb-1">
+                            <span className="font-medium text-slate-700">{d.name}</span>
+                            <span className={`text-xs font-bold ${d.movement === 'Up' ? 'text-emerald-600' : 'text-red-600'}`}>
+                              {d.from} <i class="fa-solid fa-arrow-right text-[10px] mx-1"></i> {d.to}
+                            </span>
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  )}
+                  <div className="mt-4 pt-3 border-t border-slate-100 flex gap-2">
+                     <button onClick={clearBase} className="text-xs text-red-600 hover:text-red-800 font-medium ml-auto">Clear Baseline</button>
+                  </div>
+                </Card>
+              )}
+            </div>
+
+            {/* Right Col: Dashboard */}
+            <div className="lg:col-span-2 space-y-6">
+              
+              {/* Stats Grid */}
+              {result && (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm text-center">
+                    <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">Total Accounts</div>
+                    <div className="text-3xl font-extrabold text-slate-700 mt-1">{result.rows.length}</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm text-center">
+                    <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">At Risk (Red)</div>
+                    <div className="text-3xl font-extrabold text-red-600 mt-1">{result.rows.filter(r=>r.tier==='Red').length}</div>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm text-center">
+                    <div className="text-xs font-medium text-slate-500 uppercase tracking-wide">P1 Renewal Risks</div>
+                    <div className="text-3xl font-extrabold text-amber-600 mt-1">{result.rows.filter(r=>r.p1).length}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Owner Cards */}
+              {result && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {ownerSummary.map((o,i) => (
+                    <div key={i} className="bg-white border border-slate-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="text-sm font-bold text-slate-700 truncate">{o.owner}</div>
+                      <div className="flex justify-between items-end mt-2">
+                        <span className="text-xs text-slate-400">{o.total} Accts</span>
+                        <div className="flex gap-1">
+                          {o.reds > 0 && <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-100 text-red-700 text-xs font-bold">{o.reds}</span>}
+                          {o.p1s > 0 && <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 text-amber-700 text-xs font-bold">{o.p1s}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Main Table Card */}
+              {result && (
+                <Card title="Account Health Matrix" action={
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <i className="fa-solid fa-magnifying-glass absolute left-2 top-1.5 text-slate-400 text-xs"></i>
+                      <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search..." className="pl-7 pr-2 py-1 text-xs border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 outline-none" />
+                    </div>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={filterAtRisk} onChange={e=>setFilterAtRisk(e.target.checked)} className="rounded text-indigo-600 focus:ring-indigo-500 border-slate-300" />
+                      <span className="text-xs font-medium text-slate-600">Risk Only</span>
+                    </label>
+                  </div>
+                }>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                      <thead className="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                        <tr>
+                          <th className="px-4 py-3 font-medium">Account</th>
+                          <th className="px-4 py-3 font-medium">Metric Snapshot</th>
+                          <th className="px-4 py-3 font-medium text-center">Score</th>
+                          <th className="px-4 py-3 font-medium text-center">Status</th>
+                          <th className="px-4 py-3 font-medium">Next Best Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {filteredRows.map((r, i) => (
+                          <tr key={i} className={`hover:bg-slate-50 transition-colors ${r.p1 ? 'bg-amber-50/50' : ''}`}>
+                            <td className="px-4 py-3">
+                              <div className="font-semibold text-slate-800">{r.name}</div>
+                              <div className="text-xs text-slate-500 flex items-center gap-2 mt-0.5">
+                                <span>{r.owner || 'Unassigned'}</span> • <span>{fmt.format(+r.fee || 0)}</span>
+                              </div>
+                              {r.p1 && <span className="inline-flex mt-1 items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200">RENEWAL RISK</span>}
+                            </td>
+                            <td className="px-4 py-3 text-xs text-slate-600 space-y-1">
+                              <div className="flex justify-between w-36"><span className="text-slate-400">Last Contact:</span> <span className={`font-mono font-medium ${r.lastContactDays > 60 ? 'text-red-600' : ''}`}>{r.lastContactDays}d</span></div>
+                              <div className="flex justify-between w-36"><span className="text-slate-400">Open Maint:</span> <span className={`font-mono font-medium ${r.maintenanceCount > 3 ? 'text-red-600' : ''}`}>{r.maintenanceCount}</span></div>
+                              <div className="flex justify-between w-36"><span className="text-slate-400">Sentiment:</span> <span className={`font-mono font-medium ${r.sentiment < 6 ? 'text-red-600' : 'text-emerald-600'}`}>{r.sentiment}/10</span></div>
+                            </td>
+                            <td className="px-4 py-3 text-center font-mono text-xs font-medium text-slate-600">
+                              {r.score.toFixed(2)}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              <Badge color={getTierColor(r.tier)}>{r.tier}</Badge>
+                              <div className="text-[10px] text-slate-400 mt-1 uppercase tracking-tighter">{r.dominant}</div>
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className={`text-xs font-bold mb-1 ${r.actionPlan.color}`}>{r.actionPlan.label}</div>
+                              <ul className="list-disc list-outside ml-3 text-xs text-slate-600 space-y-1 max-w-xs">
+                                {r.actionPlan.advice.map((idea, idx) => (
+                                  <li key={idx}>{idea}</li>
+                                ))}
+                              </ul>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    {filteredRows.length === 0 && <div className="text-center py-8 text-slate-400 italic text-sm">No accounts found matching filters.</div>}
+                  </div>
+                </Card>
+              )}
+
+              {/* Risk List */}
+              {result && (
+                <div className="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                  <h4 className="text-xs font-bold text-slate-500 uppercase mb-3">Revenue-Weighted Risk (Top 5)</h4>
+                  <ol className="space-y-2">
+                    {result.riskRows.slice(0,5).map((r,i)=>(
+                      <li key={i} className="flex justify-between items-center text-sm bg-white p-2 rounded border border-slate-100 shadow-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs text-slate-400 w-4">{i+1}.</span>
+                          <span className="font-medium text-slate-800">{r.name}</span>
+                        </div>
+                        <div className="text-xs font-mono text-slate-500">
+                          Risk Weight: {fmt.format(Math.max(0, Math.round(r.risk)))}
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('app')).render(<App/>);
+  </script>
+</body>
+</html>
