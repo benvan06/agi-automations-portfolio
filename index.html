@@ -265,7 +265,7 @@
                     <p class="text-indigo-100">Enter your details below and access all eight tools immediately.</p>
                 </div>
 
-                <form action="thank-you.html" method="GET" class="p-6 md:p-8 space-y-5">
+                <form id="toolkitForm" class="p-6 md:p-8 space-y-5">
                     <!-- Required Fields -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -342,10 +342,12 @@
                         </div>
                     </div>
 
-                    <button type="submit"
+                    <button type="submit" id="submitBtn"
                         class="w-full py-4 px-6 rounded-lg bg-indigo-600 text-white font-bold text-lg shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition transform hover:-translate-y-0.5">
                         Access the Toolkit Now <i class="fa-solid fa-arrow-right ml-2"></i>
                     </button>
+
+                    <div id="formStatus" class="text-center text-sm font-medium"></div>
 
                     <p class="text-xs text-slate-500 text-center">
                         <i class="fa-solid fa-lock mr-1"></i> Your information is secure. We never share your data with third parties.
@@ -403,6 +405,75 @@
             <p class="text-xs text-slate-500 mt-4">&copy; 2025 AGI Automations. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Form Submission Script -->
+    <script>
+        const GHL_WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/35zxrXynflJ20jCU2yzk/webhook-trigger/1b2c78e6-9859-4f3c-ac8c-5b6c5ea86276';
+
+        const toolkitForm = document.getElementById('toolkitForm');
+        if (toolkitForm) {
+            toolkitForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const formStatus = document.getElementById('formStatus');
+                const submitButton = document.getElementById('submitBtn');
+                const originalButtonText = submitButton.innerHTML;
+
+                // Disable button and show loading
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> Submitting...';
+                formStatus.textContent = '';
+                formStatus.className = 'text-center text-sm font-medium';
+
+                try {
+                    // Get form data
+                    const formData = new FormData(toolkitForm);
+                    const data = {};
+                    formData.forEach((value, key) => {
+                        data[key] = value;
+                    });
+
+                    // Add metadata
+                    data.submission_timestamp = new Date().toISOString();
+                    data.page_url = window.location.href;
+                    data.lead_source = 'Estate Agency Operations Toolkit';
+
+                    // Send to GHL webhook
+                    const response = await fetch(GHL_WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (response.ok || response.status === 200) {
+                        // Track conversion in Google Analytics if available
+                        if (typeof gtag !== 'undefined') {
+                            gtag('event', 'form_submission', {
+                                'event_category': 'Lead Magnet',
+                                'event_label': 'Estate Agency Toolkit Download',
+                                'value': 1
+                            });
+                        }
+
+                        // Redirect to thank you page
+                        window.location.href = 'thank-you.html';
+                    } else {
+                        throw new Error('Form submission failed');
+                    }
+                } catch (error) {
+                    console.error('Form submission error:', error);
+                    formStatus.textContent = 'Oops! There was a problem. Please try again or email us directly.';
+                    formStatus.className = 'text-center text-sm font-medium text-rose-600';
+
+                    // Re-enable button
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonText;
+                }
+            });
+        }
+    </script>
 
 </body>
 </html>
