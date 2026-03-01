@@ -57,24 +57,171 @@
         </div>
     </div>
 
-    <!-- Placeholder Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 md:p-12 text-center">
-            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-6">
-                <i class="fa-solid fa-wrench text-2xl"></i>
+    <!-- How It Works -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+        <h2 class="text-xl font-bold text-slate-800 text-center mb-8">How It Works</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-3">
+                    <i class="fa-solid fa-building text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">1. Portfolio Size</h3>
+                <p class="text-sm text-slate-600">Enter total properties under management</p>
             </div>
-            <h2 class="text-xl font-bold text-slate-800 mb-3">Tool Coming Soon</h2>
-            <p class="text-slate-600 mb-8 max-w-md mx-auto">
-                This tool is being configured for your account. You'll receive an email when it's ready to use.
+            <div class="text-center">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-3">
+                    <i class="fa-solid fa-clock text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">2. Risk Metrics</h3>
+                <p class="text-sm text-slate-600">Add renewals due, void rate, and tenure</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-3">
+                    <i class="fa-solid fa-heart-pulse text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">3. Health Score</h3>
+                <p class="text-sm text-slate-600">Get RAG-rated portfolio health assessment</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-3">
+                    <i class="fa-solid fa-list-check text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">4. Action Plan</h3>
+                <p class="text-sm text-slate-600">Receive prioritised retention actions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Demo -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-slate-50 border-b border-slate-200 px-6 py-4">
+                <h2 class="text-lg font-bold text-slate-800">
+                    <i class="fa-solid fa-play-circle text-indigo-600 mr-2"></i> Try It Now
+                </h2>
+                <p class="text-sm text-slate-600">Enter your portfolio metrics to get a health assessment</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+                <!-- Input Form -->
+                <div class="p-6">
+                    <h3 class="font-semibold text-slate-800 mb-4">Portfolio Metrics</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Total Managed Properties</label>
+                            <input type="number" id="totalProperties" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="150">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Renewals Due (Next 90 Days)</label>
+                            <input type="number" id="renewalsDue" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="25">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Current Void Rate (%)</label>
+                            <input type="number" id="voidRate" step="0.1" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="4.5">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Average Tenant Tenure (Months)</label>
+                            <input type="number" id="avgTenure" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="18">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Landlord Complaints (Last Quarter)</label>
+                            <input type="number" id="complaints" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="5">
+                        </div>
+                    </div>
+
+                    <button type="button" id="generateReport" class="w-full mt-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
+                        <i class="fa-solid fa-heart-pulse mr-2"></i> Check Portfolio Health
+                    </button>
+                </div>
+
+                <!-- Output Preview -->
+                <div class="p-6 bg-slate-50">
+                    <h3 class="font-semibold text-slate-800 mb-4">Health Assessment</h3>
+
+                    <div id="outputPlaceholder" class="text-center py-12">
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-4">
+                            <i class="fa-solid fa-heart-pulse text-2xl"></i>
+                        </div>
+                        <p class="text-slate-500 text-sm">Enter your portfolio data and click Check to see your health assessment</p>
+                    </div>
+
+                    <div id="outputReport" class="hidden space-y-4">
+                        <!-- Health Score -->
+                        <div id="healthScoreCard" class="rounded-lg p-6 text-center">
+                            <p class="text-sm uppercase tracking-wide mb-2 opacity-80">Portfolio Health Score</p>
+                            <p id="healthScore" class="text-5xl font-bold mb-2">-</p>
+                            <p id="healthLabel" class="text-lg font-semibold">-</p>
+                        </div>
+
+                        <!-- Risk Indicators -->
+                        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                            <div class="bg-slate-100 px-4 py-2 border-b border-slate-200">
+                                <h4 class="font-semibold text-slate-700 text-sm">Risk Indicators</h4>
+                            </div>
+                            <div class="divide-y divide-slate-100">
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Renewal Pressure</span>
+                                    <span id="renewalRisk" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Void Performance</span>
+                                    <span id="voidRisk" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Tenant Retention</span>
+                                    <span id="tenureRisk" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Landlord Satisfaction</span>
+                                    <span id="satisfactionRisk" class="text-sm font-semibold">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Priority Actions -->
+                        <div class="bg-blue-50 rounded-lg border border-blue-200 p-4">
+                            <h4 class="font-semibold text-blue-800 text-sm mb-2">
+                                <i class="fa-solid fa-clipboard-list mr-1"></i> Priority Actions
+                            </h4>
+                            <ul id="actionsList" class="text-sm text-blue-900 space-y-1">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Get Full Tool -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+        <div class="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-2xl p-8 md:p-12 text-center text-white">
+            <h2 class="text-2xl font-bold mb-4">Get the Full Tool</h2>
+            <p class="text-indigo-100 mb-6 max-w-xl mx-auto">
+                The complete Portfolio Health Checker includes property-level analysis, automated renewal reminders, and landlord communication templates.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="../thank-you.html" class="px-6 py-3 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Back to Toolkit
-                </a>
-                <a href="https://agi-automations.com/contact.html" class="px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition">
-                    Request Early Access
-                </a>
-            </div>
+            <ul class="text-left text-indigo-100 max-w-md mx-auto mb-8 space-y-2">
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-indigo-300"></i> Property-level risk scoring
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-indigo-300"></i> Automated renewal reminders
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-indigo-300"></i> Landlord communication templates
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-indigo-300"></i> Void period tracking dashboard
+                </li>
+            </ul>
+            <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-indigo-700 font-semibold rounded-lg hover:bg-indigo-50 transition">
+                <i class="fa-solid fa-download"></i> Download Full Tool
+            </a>
+            <p class="text-indigo-200 text-xs mt-4">Link available soon</p>
         </div>
     </div>
 
@@ -85,6 +232,106 @@
             <p class="text-xs text-slate-500 mt-2">&copy; 2025 AGI Automations. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        document.getElementById('generateReport').addEventListener('click', function() {
+            const totalProperties = parseInt(document.getElementById('totalProperties').value) || 0;
+            const renewalsDue = parseInt(document.getElementById('renewalsDue').value) || 0;
+            const voidRate = parseFloat(document.getElementById('voidRate').value) || 0;
+            const avgTenure = parseInt(document.getElementById('avgTenure').value) || 0;
+            const complaints = parseInt(document.getElementById('complaints').value) || 0;
+
+            if (totalProperties === 0) {
+                alert('Please enter total managed properties');
+                return;
+            }
+
+            // Show output
+            document.getElementById('outputPlaceholder').classList.add('hidden');
+            document.getElementById('outputReport').classList.remove('hidden');
+
+            // Calculate metrics
+            const renewalPct = (renewalsDue / totalProperties) * 100;
+            const complaintsPer100 = (complaints / totalProperties) * 100;
+
+            // Score each factor (0-25 points each, max 100)
+            let score = 0;
+
+            // Renewal pressure (lower is better) - max 25 points
+            let renewalScore = renewalPct < 10 ? 25 : renewalPct < 20 ? 18 : renewalPct < 30 ? 10 : 5;
+            score += renewalScore;
+
+            // Void rate (lower is better, industry avg ~3-5%) - max 25 points
+            let voidScore = voidRate < 3 ? 25 : voidRate < 5 ? 20 : voidRate < 8 ? 12 : 5;
+            score += voidScore;
+
+            // Tenant tenure (higher is better, 12+ months good) - max 25 points
+            let tenureScore = avgTenure >= 24 ? 25 : avgTenure >= 18 ? 20 : avgTenure >= 12 ? 15 : 8;
+            score += tenureScore;
+
+            // Complaints (lower is better) - max 25 points
+            let satisfactionScore = complaintsPer100 < 2 ? 25 : complaintsPer100 < 5 ? 18 : complaintsPer100 < 10 ? 10 : 5;
+            score += satisfactionScore;
+
+            // Determine health status
+            let healthLabel, bgColor, textColor;
+            if (score >= 80) {
+                healthLabel = 'Excellent';
+                bgColor = 'bg-emerald-500';
+                textColor = 'text-white';
+            } else if (score >= 60) {
+                healthLabel = 'Good';
+                bgColor = 'bg-emerald-400';
+                textColor = 'text-white';
+            } else if (score >= 40) {
+                healthLabel = 'Needs Attention';
+                bgColor = 'bg-amber-400';
+                textColor = 'text-amber-900';
+            } else {
+                healthLabel = 'At Risk';
+                bgColor = 'bg-red-500';
+                textColor = 'text-white';
+            }
+
+            // Update health score card
+            const healthCard = document.getElementById('healthScoreCard');
+            healthCard.className = `rounded-lg p-6 text-center ${bgColor} ${textColor}`;
+            document.getElementById('healthScore').textContent = score;
+            document.getElementById('healthLabel').textContent = healthLabel;
+
+            // Risk indicators
+            const riskClass = (score, thresholds) => {
+                if (score >= thresholds[0]) return '<span class="text-emerald-600">Low Risk</span>';
+                if (score >= thresholds[1]) return '<span class="text-amber-600">Medium Risk</span>';
+                return '<span class="text-red-600">High Risk</span>';
+            };
+
+            document.getElementById('renewalRisk').innerHTML = riskClass(renewalScore, [20, 12]);
+            document.getElementById('voidRisk').innerHTML = riskClass(voidScore, [20, 12]);
+            document.getElementById('tenureRisk').innerHTML = riskClass(tenureScore, [20, 12]);
+            document.getElementById('satisfactionRisk').innerHTML = riskClass(satisfactionScore, [20, 12]);
+
+            // Generate actions
+            const actions = [];
+            if (renewalScore < 18) {
+                actions.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-exclamation-circle text-blue-600 mt-0.5"></i>Contact ${renewalsDue} tenants with upcoming renewals within 60 days</li>`);
+            }
+            if (voidScore < 20) {
+                actions.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-exclamation-circle text-blue-600 mt-0.5"></i>Review void properties - current ${voidRate}% is above target</li>`);
+            }
+            if (tenureScore < 20) {
+                actions.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-exclamation-circle text-blue-600 mt-0.5"></i>Implement tenant retention programme to improve ${avgTenure}-month average tenure</li>`);
+            }
+            if (satisfactionScore < 18) {
+                actions.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-exclamation-circle text-blue-600 mt-0.5"></i>Address landlord complaints - ${complaints} issues require resolution</li>`);
+            }
+            if (actions.length === 0) {
+                actions.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-check-circle text-blue-600 mt-0.5"></i>Portfolio health is strong - maintain current practices</li>`);
+            }
+
+            document.getElementById('actionsList').innerHTML = actions.join('');
+        });
+    </script>
 
 </body>
 </html>

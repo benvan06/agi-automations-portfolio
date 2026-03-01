@@ -57,24 +57,175 @@
         </div>
     </div>
 
-    <!-- Placeholder Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 md:p-12 text-center">
-            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-6">
-                <i class="fa-solid fa-wrench text-2xl"></i>
+    <!-- How It Works -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+        <h2 class="text-xl font-bold text-slate-800 text-center mb-8">How It Works</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+                    <i class="fa-solid fa-building text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">1. Select Branch</h3>
+                <p class="text-sm text-slate-600">Choose the branch to audit</p>
             </div>
-            <h2 class="text-xl font-bold text-slate-800 mb-3">Tool Coming Soon</h2>
-            <p class="text-slate-600 mb-8 max-w-md mx-auto">
-                This tool is being configured for your account. You'll receive an email when it's ready to use.
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+                    <i class="fa-solid fa-list-check text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">2. Choose Audit Type</h3>
+                <p class="text-sm text-slate-600">AML, GDPR, Property, or Full audit</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+                    <i class="fa-solid fa-clipboard-check text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">3. Generate Checklist</h3>
+                <p class="text-sm text-slate-600">Get tailored compliance checklist</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+                    <i class="fa-solid fa-shield-check text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">4. Track Progress</h3>
+                <p class="text-sm text-slate-600">Document findings and next steps</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Demo -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-slate-50 border-b border-slate-200 px-6 py-4">
+                <h2 class="text-lg font-bold text-slate-800">
+                    <i class="fa-solid fa-play-circle text-emerald-600 mr-2"></i> Try It Now
+                </h2>
+                <p class="text-sm text-slate-600">Configure your audit parameters to generate a compliance checklist</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+                <!-- Input Form -->
+                <div class="p-6">
+                    <h3 class="font-semibold text-slate-800 mb-4">Audit Configuration</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Branch Name</label>
+                            <input type="text" id="branchName" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g., London Central">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Audit Type</label>
+                            <select id="auditType" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                <option value="aml">AML (Anti-Money Laundering)</option>
+                                <option value="gdpr">GDPR (Data Protection)</option>
+                                <option value="property">Property Compliance</option>
+                                <option value="full" selected>Full Compliance Audit</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Last Audit Date</label>
+                            <input type="date" id="lastAudit" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Number of Staff</label>
+                            <input type="number" id="staffCount" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="8">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Known Issues (Optional)</label>
+                            <textarea id="knownIssues" rows="2" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g., AML training overdue for 2 staff members..."></textarea>
+                        </div>
+                    </div>
+
+                    <button type="button" id="generateReport" class="w-full mt-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition">
+                        <i class="fa-solid fa-clipboard-check mr-2"></i> Generate Audit Checklist
+                    </button>
+                </div>
+
+                <!-- Output Preview -->
+                <div class="p-6 bg-slate-50">
+                    <h3 class="font-semibold text-slate-800 mb-4">Audit Preview</h3>
+
+                    <div id="outputPlaceholder" class="text-center py-12">
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-4">
+                            <i class="fa-solid fa-clipboard-list text-2xl"></i>
+                        </div>
+                        <p class="text-slate-500 text-sm">Configure audit parameters and click Generate to see your checklist</p>
+                    </div>
+
+                    <div id="outputReport" class="hidden space-y-4">
+                        <!-- Audit Header -->
+                        <div class="bg-white rounded-lg border border-slate-200 p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <span id="auditTypeLabel" class="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Full Audit</span>
+                                <span id="auditDate" class="text-xs text-slate-500">-</span>
+                            </div>
+                            <h4 id="branchLabel" class="font-bold text-slate-800">Branch Compliance Audit</h4>
+                        </div>
+
+                        <!-- Compliance Score -->
+                        <div id="scoreCard" class="rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm opacity-80">Estimated Readiness</p>
+                                    <p id="readinessLabel" class="font-bold text-lg">-</p>
+                                </div>
+                                <div id="scoreCircle" class="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold">
+                                    -
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Checklist Preview -->
+                        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                            <div class="bg-slate-100 px-4 py-2 border-b border-slate-200">
+                                <h4 class="font-semibold text-slate-700 text-sm">Key Checklist Items</h4>
+                            </div>
+                            <ul id="checklistItems" class="divide-y divide-slate-100">
+                            </ul>
+                        </div>
+
+                        <!-- Risk Areas -->
+                        <div id="riskAreas" class="bg-red-50 rounded-lg border border-red-200 p-4 hidden">
+                            <h4 class="font-semibold text-red-800 text-sm mb-2">
+                                <i class="fa-solid fa-exclamation-triangle mr-1"></i> Risk Areas Identified
+                            </h4>
+                            <ul id="riskList" class="text-sm text-red-900 space-y-1">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Get Full Tool -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+        <div class="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl p-8 md:p-12 text-center text-white">
+            <h2 class="text-2xl font-bold mb-4">Get the Full Tool</h2>
+            <p class="text-emerald-100 mb-6 max-w-xl mx-auto">
+                The complete Compliance Audit Generator includes interactive checklists, evidence upload, automated scheduling, and regulatory update alerts.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="../thank-you.html" class="px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Back to Toolkit
-                </a>
-                <a href="https://agi-automations.com/contact.html" class="px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition">
-                    Request Early Access
-                </a>
-            </div>
+            <ul class="text-left text-emerald-100 max-w-md mx-auto mb-8 space-y-2">
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-emerald-300"></i> Interactive audit checklists
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-emerald-300"></i> Evidence documentation & upload
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-emerald-300"></i> Automated audit scheduling
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-emerald-300"></i> Regulatory update alerts
+                </li>
+            </ul>
+            <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition">
+                <i class="fa-solid fa-download"></i> Download Full Tool
+            </a>
+            <p class="text-emerald-200 text-xs mt-4">Link available soon</p>
         </div>
     </div>
 
@@ -85,6 +236,137 @@
             <p class="text-xs text-slate-500 mt-2">&copy; 2025 AGI Automations. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        const checklists = {
+            aml: [
+                'Staff AML training records up to date',
+                'Customer due diligence procedures documented',
+                'Risk assessment for all clients completed',
+                'Suspicious activity reporting process in place',
+                'Source of funds verification documented',
+                'PEP screening procedures followed'
+            ],
+            gdpr: [
+                'Privacy notice displayed and accessible',
+                'Data processing records maintained',
+                'Subject access request process documented',
+                'Data retention policy implemented',
+                'Third-party data processor agreements signed',
+                'Breach notification procedure in place'
+            ],
+            property: [
+                'EPC certificates valid for all listings',
+                'Gas safety certificates current',
+                'Electrical safety certificates current',
+                'Deposit protection schemes registered',
+                'How to Rent guide provided to tenants',
+                'Right to Rent checks documented'
+            ],
+            full: [
+                'Staff AML training records up to date',
+                'Customer due diligence procedures documented',
+                'Privacy notice displayed and accessible',
+                'Data processing records maintained',
+                'EPC certificates valid for all listings',
+                'Gas safety certificates current',
+                'Deposit protection schemes registered',
+                'Professional indemnity insurance valid'
+            ]
+        };
+
+        document.getElementById('generateReport').addEventListener('click', function() {
+            const branchName = document.getElementById('branchName').value || 'Unnamed Branch';
+            const auditType = document.getElementById('auditType').value;
+            const lastAudit = document.getElementById('lastAudit').value;
+            const staffCount = parseInt(document.getElementById('staffCount').value) || 0;
+            const knownIssues = document.getElementById('knownIssues').value.trim();
+
+            // Show output
+            document.getElementById('outputPlaceholder').classList.add('hidden');
+            document.getElementById('outputReport').classList.remove('hidden');
+
+            // Set header info
+            const auditLabels = { aml: 'AML Audit', gdpr: 'GDPR Audit', property: 'Property Compliance', full: 'Full Compliance Audit' };
+            document.getElementById('auditTypeLabel').textContent = auditLabels[auditType];
+            document.getElementById('branchLabel').textContent = `${branchName} - Compliance Audit`;
+            document.getElementById('auditDate').textContent = new Date().toLocaleDateString('en-GB');
+
+            // Calculate days since last audit
+            let daysSinceAudit = 365;
+            if (lastAudit) {
+                const lastDate = new Date(lastAudit);
+                daysSinceAudit = Math.floor((new Date() - lastDate) / (1000 * 60 * 60 * 24));
+            }
+
+            // Calculate readiness score
+            let score = 70; // Base score
+            if (daysSinceAudit < 90) score += 15;
+            else if (daysSinceAudit < 180) score += 10;
+            else if (daysSinceAudit > 365) score -= 20;
+
+            if (knownIssues) score -= 15;
+            if (staffCount > 0 && staffCount < 5) score += 5;
+
+            score = Math.max(20, Math.min(95, score));
+
+            // Set score display
+            const scoreCard = document.getElementById('scoreCard');
+            const scoreCircle = document.getElementById('scoreCircle');
+            let readinessLabel, bgClass, circleClass;
+
+            if (score >= 80) {
+                readinessLabel = 'Audit Ready';
+                bgClass = 'bg-emerald-100 text-emerald-800';
+                circleClass = 'bg-emerald-500 text-white';
+            } else if (score >= 60) {
+                readinessLabel = 'Minor Gaps';
+                bgClass = 'bg-amber-100 text-amber-800';
+                circleClass = 'bg-amber-500 text-white';
+            } else {
+                readinessLabel = 'Attention Required';
+                bgClass = 'bg-red-100 text-red-800';
+                circleClass = 'bg-red-500 text-white';
+            }
+
+            scoreCard.className = `rounded-lg p-4 ${bgClass}`;
+            scoreCircle.className = `w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold ${circleClass}`;
+            scoreCircle.textContent = score;
+            document.getElementById('readinessLabel').textContent = readinessLabel;
+
+            // Generate checklist
+            const items = checklists[auditType];
+            document.getElementById('checklistItems').innerHTML = items.map(item => `
+                <li class="px-4 py-2 flex items-center gap-3 text-sm">
+                    <i class="fa-regular fa-square text-slate-400"></i>
+                    <span class="text-slate-700">${item}</span>
+                </li>
+            `).join('');
+
+            // Risk areas
+            const riskAreasDiv = document.getElementById('riskAreas');
+            const risks = [];
+
+            if (daysSinceAudit > 365) {
+                risks.push('Last audit was over 12 months ago - immediate review recommended');
+            }
+            if (daysSinceAudit > 180) {
+                risks.push('Audit overdue - schedule within 30 days');
+            }
+            if (knownIssues) {
+                risks.push(`Known issues flagged: ${knownIssues}`);
+            }
+
+            if (risks.length > 0) {
+                riskAreasDiv.classList.remove('hidden');
+                document.getElementById('riskList').innerHTML = risks.map(r =>
+                    `<li class="flex items-start gap-2"><i class="fa-solid fa-circle text-red-500 mt-1 text-xs"></i>${r}</li>`
+                ).join('');
+            } else {
+                riskAreasDiv.classList.add('hidden');
+            }
+        });
+    </script>
 
 </body>
 </html>

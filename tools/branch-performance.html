@@ -57,24 +57,208 @@
         </div>
     </div>
 
-    <!-- Placeholder Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 md:p-12 text-center">
-            <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-6">
-                <i class="fa-solid fa-wrench text-2xl"></i>
+    <!-- How It Works -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+        <h2 class="text-xl font-bold text-slate-800 text-center mb-8">How It Works</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-3">
+                    <i class="fa-solid fa-building text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">1. Add Branches</h3>
+                <p class="text-sm text-slate-600">Enter details for each branch you want to compare</p>
             </div>
-            <h2 class="text-xl font-bold text-slate-800 mb-3">Tool Coming Soon</h2>
-            <p class="text-slate-600 mb-8 max-w-md mx-auto">
-                This tool is being configured for your account. You'll receive an email when it's ready to use.
+            <div class="text-center">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-3">
+                    <i class="fa-solid fa-calculator text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">2. Input Metrics</h3>
+                <p class="text-sm text-slate-600">Revenue, transactions, listings, and days on market</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-3">
+                    <i class="fa-solid fa-chart-bar text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">3. Generate Report</h3>
+                <p class="text-sm text-slate-600">Click generate for instant comparison analysis</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mx-auto mb-3">
+                    <i class="fa-solid fa-lightbulb text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">4. Get Insights</h3>
+                <p class="text-sm text-slate-600">Rankings, highlights, and recommendations</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Demo -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-slate-50 border-b border-slate-200 px-6 py-4">
+                <h2 class="text-lg font-bold text-slate-800">
+                    <i class="fa-solid fa-play-circle text-indigo-600 mr-2"></i> Try It Now
+                </h2>
+                <p class="text-sm text-slate-600">Enter your branch data below to see a sample comparison report</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+                <!-- Input Form -->
+                <div class="p-6">
+                    <h3 class="font-semibold text-slate-800 mb-4">Branch Data</h3>
+
+                    <div id="branchesContainer">
+                        <!-- Branch 1 -->
+                        <div class="branch-entry bg-slate-50 rounded-lg p-4 mb-4" data-branch="1">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="font-medium text-slate-700">Branch 1</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Branch Name</label>
+                                    <input type="text" class="branch-name w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., London Central">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Revenue This Month (£)</label>
+                                    <input type="number" class="branch-revenue w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="125000">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Transactions Completed</label>
+                                    <input type="number" class="branch-transactions w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="12">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Active Listings</label>
+                                    <input type="number" class="branch-listings w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="45">
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Avg Days on Market</label>
+                                    <input type="number" class="branch-dom w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="28">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Branch 2 -->
+                        <div class="branch-entry bg-slate-50 rounded-lg p-4 mb-4" data-branch="2">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="font-medium text-slate-700">Branch 2</span>
+                                <button type="button" class="remove-branch text-slate-400 hover:text-red-500 transition" title="Remove branch">
+                                    <i class="fa-solid fa-times"></i>
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Branch Name</label>
+                                    <input type="text" class="branch-name w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Manchester">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Revenue This Month (£)</label>
+                                    <input type="number" class="branch-revenue w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="98000">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Transactions Completed</label>
+                                    <input type="number" class="branch-transactions w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="9">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Active Listings</label>
+                                    <input type="number" class="branch-listings w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="38">
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-xs font-medium text-slate-600 mb-1">Avg Days on Market</label>
+                                    <input type="number" class="branch-dom w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="35">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" id="addBranch" class="w-full py-2 border-2 border-dashed border-slate-300 rounded-lg text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition text-sm font-medium mb-4">
+                        <i class="fa-solid fa-plus mr-2"></i> Add Another Branch
+                    </button>
+
+                    <button type="button" id="generateReport" class="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
+                        <i class="fa-solid fa-chart-bar mr-2"></i> Generate Comparison Report
+                    </button>
+                </div>
+
+                <!-- Output Preview -->
+                <div class="p-6 bg-slate-50">
+                    <h3 class="font-semibold text-slate-800 mb-4">Report Preview</h3>
+
+                    <div id="outputPlaceholder" class="text-center py-12">
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-4">
+                            <i class="fa-solid fa-file-lines text-2xl"></i>
+                        </div>
+                        <p class="text-slate-500 text-sm">Enter branch data and click Generate to see your comparison report</p>
+                    </div>
+
+                    <div id="outputReport" class="hidden">
+                        <!-- Top Performer -->
+                        <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-lg p-4 text-white mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                                    <i class="fa-solid fa-trophy"></i>
+                                </div>
+                                <div>
+                                    <p class="text-indigo-200 text-xs uppercase tracking-wide">Top Performer</p>
+                                    <p id="topPerformer" class="font-bold text-lg">-</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Comparison Table -->
+                        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden mb-4">
+                            <table class="w-full text-sm">
+                                <thead class="bg-slate-100">
+                                    <tr>
+                                        <th class="px-3 py-2 text-left font-semibold text-slate-700">Branch</th>
+                                        <th class="px-3 py-2 text-right font-semibold text-slate-700">Revenue</th>
+                                        <th class="px-3 py-2 text-right font-semibold text-slate-700">Rev/Trans</th>
+                                        <th class="px-3 py-2 text-center font-semibold text-slate-700">Rank</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="comparisonTable">
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Recommendations -->
+                        <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-amber-800 text-sm mb-2">
+                                <i class="fa-solid fa-lightbulb mr-1"></i> Key Insights
+                            </h4>
+                            <ul id="recommendations" class="text-sm text-amber-900 space-y-1">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Get Full Tool -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+        <div class="bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-2xl p-8 md:p-12 text-center text-white">
+            <h2 class="text-2xl font-bold mb-4">Get the Full Tool</h2>
+            <p class="text-indigo-100 mb-6 max-w-xl mx-auto">
+                The complete Branch Performance Comparison tool includes historical trend analysis, automated weekly reports, and integration with your property management system.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="../thank-you.html" class="px-6 py-3 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Back to Toolkit
-                </a>
-                <a href="https://agi-automations.com/contact.html" class="px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition">
-                    Request Early Access
-                </a>
-            </div>
+            <ul class="text-left text-indigo-100 max-w-md mx-auto mb-8 space-y-2">
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-indigo-300"></i> Unlimited branch comparisons
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-indigo-300"></i> Month-over-month trend analysis
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-indigo-300"></i> Export to PDF & Excel
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-indigo-300"></i> Automated weekly email reports
+                </li>
+            </ul>
+            <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-indigo-700 font-semibold rounded-lg hover:bg-indigo-50 transition">
+                <i class="fa-solid fa-download"></i> Download Full Tool
+            </a>
+            <p class="text-indigo-200 text-xs mt-4">Link available soon</p>
         </div>
     </div>
 
@@ -85,6 +269,140 @@
             <p class="text-xs text-slate-500 mt-2">&copy; 2025 AGI Automations. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        // Branch counter
+        let branchCount = 2;
+
+        // Add branch button
+        document.getElementById('addBranch').addEventListener('click', function() {
+            branchCount++;
+            const container = document.getElementById('branchesContainer');
+            const newBranch = document.createElement('div');
+            newBranch.className = 'branch-entry bg-slate-50 rounded-lg p-4 mb-4';
+            newBranch.dataset.branch = branchCount;
+            newBranch.innerHTML = `
+                <div class="flex justify-between items-center mb-3">
+                    <span class="font-medium text-slate-700">Branch ${branchCount}</span>
+                    <button type="button" class="remove-branch text-slate-400 hover:text-red-500 transition" title="Remove branch">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Branch Name</label>
+                        <input type="text" class="branch-name w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Birmingham">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Revenue This Month (£)</label>
+                        <input type="number" class="branch-revenue w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="85000">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Transactions Completed</label>
+                        <input type="number" class="branch-transactions w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="8">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Active Listings</label>
+                        <input type="number" class="branch-listings w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="32">
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Avg Days on Market</label>
+                        <input type="number" class="branch-dom w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="42">
+                    </div>
+                </div>
+            `;
+            container.appendChild(newBranch);
+        });
+
+        // Remove branch (event delegation)
+        document.getElementById('branchesContainer').addEventListener('click', function(e) {
+            if (e.target.closest('.remove-branch')) {
+                const branches = document.querySelectorAll('.branch-entry');
+                if (branches.length > 1) {
+                    e.target.closest('.branch-entry').remove();
+                }
+            }
+        });
+
+        // Generate report
+        document.getElementById('generateReport').addEventListener('click', function() {
+            const branches = [];
+            document.querySelectorAll('.branch-entry').forEach(entry => {
+                const name = entry.querySelector('.branch-name').value || `Branch ${entry.dataset.branch}`;
+                const revenue = parseFloat(entry.querySelector('.branch-revenue').value) || 0;
+                const transactions = parseInt(entry.querySelector('.branch-transactions').value) || 0;
+                const listings = parseInt(entry.querySelector('.branch-listings').value) || 0;
+                const dom = parseInt(entry.querySelector('.branch-dom').value) || 0;
+
+                branches.push({
+                    name,
+                    revenue,
+                    transactions,
+                    listings,
+                    dom,
+                    revenuePerTrans: transactions > 0 ? revenue / transactions : 0
+                });
+            });
+
+            if (branches.length === 0 || branches.every(b => b.revenue === 0)) {
+                alert('Please enter data for at least one branch');
+                return;
+            }
+
+            // Sort by revenue
+            branches.sort((a, b) => b.revenue - a.revenue);
+
+            // Show output
+            document.getElementById('outputPlaceholder').classList.add('hidden');
+            document.getElementById('outputReport').classList.remove('hidden');
+
+            // Top performer
+            document.getElementById('topPerformer').textContent = branches[0].name;
+
+            // Comparison table
+            const tableBody = document.getElementById('comparisonTable');
+            tableBody.innerHTML = branches.map((b, i) => `
+                <tr class="${i === 0 ? 'bg-indigo-50' : ''}">
+                    <td class="px-3 py-2 font-medium ${i === 0 ? 'text-indigo-700' : 'text-slate-800'}">
+                        ${i === 0 ? '<i class="fa-solid fa-crown text-amber-500 mr-1"></i>' : ''}${b.name}
+                    </td>
+                    <td class="px-3 py-2 text-right text-slate-600">£${b.revenue.toLocaleString()}</td>
+                    <td class="px-3 py-2 text-right text-slate-600">£${Math.round(b.revenuePerTrans).toLocaleString()}</td>
+                    <td class="px-3 py-2 text-center">
+                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full ${i === 0 ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'} text-xs font-bold">${i + 1}</span>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Recommendations
+            const recommendations = [];
+            const avgRevenue = branches.reduce((sum, b) => sum + b.revenue, 0) / branches.length;
+            const avgDOM = branches.reduce((sum, b) => sum + b.dom, 0) / branches.length;
+
+            // Find underperformers
+            const underperformers = branches.filter(b => b.revenue < avgRevenue * 0.8);
+            if (underperformers.length > 0) {
+                recommendations.push(`<li>${underperformers.map(b => b.name).join(', ')} ${underperformers.length === 1 ? 'is' : 'are'} below average revenue - review pricing strategy</li>`);
+            }
+
+            // DOM insights
+            const slowBranches = branches.filter(b => b.dom > avgDOM * 1.2);
+            if (slowBranches.length > 0) {
+                recommendations.push(`<li>${slowBranches.map(b => b.name).join(', ')} ${slowBranches.length === 1 ? 'has' : 'have'} higher days on market - consider marketing review</li>`);
+            }
+
+            // Best practices
+            if (branches[0].revenuePerTrans > avgRevenue / branches.reduce((sum, b) => sum + b.transactions, 0) * branches.length * 1.1) {
+                recommendations.push(`<li>${branches[0].name}'s pricing strategy could be replicated across other branches</li>`);
+            }
+
+            if (recommendations.length === 0) {
+                recommendations.push('<li>All branches are performing within expected ranges</li>');
+            }
+
+            document.getElementById('recommendations').innerHTML = recommendations.join('');
+        });
+    </script>
 
 </body>
 </html>

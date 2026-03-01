@@ -57,24 +57,186 @@
         </div>
     </div>
 
-    <!-- Placeholder Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 md:p-12 text-center">
-            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-6">
-                <i class="fa-solid fa-wrench text-2xl"></i>
+    <!-- How It Works -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+        <h2 class="text-xl font-bold text-slate-800 text-center mb-8">How It Works</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-3">
+                    <i class="fa-solid fa-users text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">1. Current Team</h3>
+                <p class="text-sm text-slate-600">Enter your current headcount</p>
             </div>
-            <h2 class="text-xl font-bold text-slate-800 mb-3">Tool Coming Soon</h2>
-            <p class="text-slate-600 mb-8 max-w-md mx-auto">
-                This tool is being configured for your account. You'll receive an email when it's ready to use.
+            <div class="text-center">
+                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-3">
+                    <i class="fa-solid fa-chart-line text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">2. Growth Target</h3>
+                <p class="text-sm text-slate-600">Set your transaction targets</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-3">
+                    <i class="fa-solid fa-calculator text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">3. Calculate</h3>
+                <p class="text-sm text-slate-600">Get hiring recommendations</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-3">
+                    <i class="fa-solid fa-calendar text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">4. Plan</h3>
+                <p class="text-sm text-slate-600">Timeline and cost projection</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Demo -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-slate-50 border-b border-slate-200 px-6 py-4">
+                <h2 class="text-lg font-bold text-slate-800">
+                    <i class="fa-solid fa-play-circle text-amber-600 mr-2"></i> Try It Now
+                </h2>
+                <p class="text-sm text-slate-600">Enter your team data to get a recruitment plan</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+                <!-- Input Form -->
+                <div class="p-6">
+                    <h3 class="font-semibold text-slate-800 mb-4">Team & Targets</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Current Headcount (Sales Staff)</label>
+                            <input type="number" id="currentHeadcount" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="12">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Monthly Transaction Target</label>
+                            <input type="number" id="transactionTarget" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="25">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Current Transactions per Head (Monthly)</label>
+                            <input type="number" id="currentPerHead" step="0.1" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="1.8">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Growth Target (%)</label>
+                            <input type="number" id="growthTarget" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="20">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Average Ramp-up Time for New Hires (Months)</label>
+                            <input type="number" id="rampTime" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="3">
+                        </div>
+                    </div>
+
+                    <button type="button" id="generateReport" class="w-full mt-6 py-3 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700 transition">
+                        <i class="fa-solid fa-users mr-2"></i> Calculate Hiring Needs
+                    </button>
+                </div>
+
+                <!-- Output Preview -->
+                <div class="p-6 bg-slate-50">
+                    <h3 class="font-semibold text-slate-800 mb-4">Recruitment Plan</h3>
+
+                    <div id="outputPlaceholder" class="text-center py-12">
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-4">
+                            <i class="fa-solid fa-users text-2xl"></i>
+                        </div>
+                        <p class="text-slate-500 text-sm">Enter your team data and click Calculate to see your recruitment plan</p>
+                    </div>
+
+                    <div id="outputReport" class="hidden space-y-4">
+                        <!-- Hiring Requirement -->
+                        <div id="hiringCard" class="rounded-lg p-6 text-center">
+                            <p class="text-sm uppercase tracking-wide mb-2 opacity-80">New Hires Required</p>
+                            <p id="hiresNeeded" class="text-5xl font-bold mb-2">-</p>
+                            <p id="hiringLabel" class="text-lg font-semibold">-</p>
+                        </div>
+
+                        <!-- Capacity Analysis -->
+                        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                            <div class="bg-slate-100 px-4 py-2 border-b border-slate-200">
+                                <h4 class="font-semibold text-slate-700 text-sm">Capacity Analysis</h4>
+                            </div>
+                            <div class="divide-y divide-slate-100">
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Current Capacity</span>
+                                    <span id="currentCapacity" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Target Capacity</span>
+                                    <span id="targetCapacity" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Capacity Gap</span>
+                                    <span id="capacityGap" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Time to Full Productivity</span>
+                                    <span id="fullProductivity" class="text-sm font-semibold">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Timeline -->
+                        <div class="bg-white rounded-lg border border-slate-200 p-4">
+                            <h4 class="font-semibold text-slate-700 text-sm mb-3">Recommended Timeline</h4>
+                            <div id="timeline" class="space-y-2">
+                            </div>
+                        </div>
+
+                        <!-- Cost Projection -->
+                        <div class="bg-blue-50 rounded-lg border border-blue-200 p-4">
+                            <h4 class="font-semibold text-blue-800 text-sm mb-2">
+                                <i class="fa-solid fa-calculator mr-1"></i> Cost Projection (Estimate)
+                            </h4>
+                            <div class="grid grid-cols-2 gap-4 text-center mt-3">
+                                <div class="bg-white rounded-lg p-3">
+                                    <p class="text-xs text-blue-600 mb-1">Recruitment Costs</p>
+                                    <p id="recruitmentCost" class="text-lg font-bold text-blue-800">-</p>
+                                </div>
+                                <div class="bg-white rounded-lg p-3">
+                                    <p class="text-xs text-blue-600 mb-1">Annual Salary Cost</p>
+                                    <p id="salaryCost" class="text-lg font-bold text-blue-800">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Get Full Tool -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+        <div class="bg-gradient-to-br from-amber-600 to-amber-700 rounded-2xl p-8 md:p-12 text-center text-white">
+            <h2 class="text-2xl font-bold mb-4">Get the Full Tool</h2>
+            <p class="text-amber-100 mb-6 max-w-xl mx-auto">
+                The complete Recruitment & Capacity Planner includes role-specific planning, salary benchmarking, interview scheduling, and onboarding tracking.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="../thank-you.html" class="px-6 py-3 rounded-lg bg-amber-600 text-white font-semibold hover:bg-amber-700 transition">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Back to Toolkit
-                </a>
-                <a href="https://agi-automations.com/contact.html" class="px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition">
-                    Request Early Access
-                </a>
-            </div>
+            <ul class="text-left text-amber-100 max-w-md mx-auto mb-8 space-y-2">
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-amber-300"></i> Role-specific capacity planning
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-amber-300"></i> Salary benchmarking data
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-amber-300"></i> Interview scheduling integration
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-amber-300"></i> Onboarding progress tracking
+                </li>
+            </ul>
+            <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-amber-700 font-semibold rounded-lg hover:bg-amber-50 transition">
+                <i class="fa-solid fa-download"></i> Download Full Tool
+            </a>
+            <p class="text-amber-200 text-xs mt-4">Link available soon</p>
         </div>
     </div>
 
@@ -85,6 +247,122 @@
             <p class="text-xs text-slate-500 mt-2">&copy; 2025 AGI Automations. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        document.getElementById('generateReport').addEventListener('click', function() {
+            const currentHeadcount = parseInt(document.getElementById('currentHeadcount').value) || 0;
+            const transactionTarget = parseInt(document.getElementById('transactionTarget').value) || 0;
+            const currentPerHead = parseFloat(document.getElementById('currentPerHead').value) || 0;
+            const growthTarget = parseFloat(document.getElementById('growthTarget').value) || 0;
+            const rampTime = parseInt(document.getElementById('rampTime').value) || 3;
+
+            if (currentHeadcount === 0 || transactionTarget === 0) {
+                alert('Please enter current headcount and transaction target');
+                return;
+            }
+
+            // Show output
+            document.getElementById('outputPlaceholder').classList.add('hidden');
+            document.getElementById('outputReport').classList.remove('hidden');
+
+            // Calculate metrics
+            const currentCapacity = currentHeadcount * currentPerHead;
+            const targetWithGrowth = transactionTarget * (1 + growthTarget / 100);
+            const capacityGap = Math.max(0, targetWithGrowth - currentCapacity);
+
+            // Calculate hires needed (assuming same productivity)
+            const productivityRate = currentPerHead > 0 ? currentPerHead : 1.5; // Default if not provided
+            const hiresNeeded = Math.ceil(capacityGap / (productivityRate * 0.7)); // 70% effectiveness for new hires in year 1
+
+            // Display hiring card
+            const hiringCard = document.getElementById('hiringCard');
+            let hiringLabel, bgClass;
+
+            if (hiresNeeded === 0) {
+                hiringLabel = 'Fully Staffed';
+                bgClass = 'bg-emerald-500 text-white';
+            } else if (hiresNeeded <= 2) {
+                hiringLabel = 'Minor Hiring Needed';
+                bgClass = 'bg-amber-400 text-amber-900';
+            } else {
+                hiringLabel = 'Significant Hiring Needed';
+                bgClass = 'bg-red-500 text-white';
+            }
+
+            hiringCard.className = `rounded-lg p-6 text-center ${bgClass}`;
+            document.getElementById('hiresNeeded').textContent = hiresNeeded;
+            document.getElementById('hiringLabel').textContent = hiringLabel;
+
+            // Capacity analysis
+            document.getElementById('currentCapacity').textContent = `${currentCapacity.toFixed(1)} trans/month`;
+            document.getElementById('targetCapacity').textContent = `${targetWithGrowth.toFixed(1)} trans/month`;
+
+            const gapText = capacityGap > 0
+                ? `<span class="text-red-600">-${capacityGap.toFixed(1)} trans/month</span>`
+                : `<span class="text-emerald-600">No gap</span>`;
+            document.getElementById('capacityGap').innerHTML = gapText;
+            document.getElementById('fullProductivity').textContent = `${rampTime} months`;
+
+            // Timeline
+            const timelineDiv = document.getElementById('timeline');
+            if (hiresNeeded > 0) {
+                const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                const now = new Date();
+                const startMonth = months[now.getMonth()];
+                const hiringComplete = months[(now.getMonth() + 2) % 12];
+                const fullyRamped = months[(now.getMonth() + 2 + rampTime) % 12];
+
+                timelineDiv.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
+                            <i class="fa-solid fa-play text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-slate-800">Start recruitment</p>
+                            <p class="text-xs text-slate-500">${startMonth} - Post positions, begin screening</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 flex-shrink-0">
+                            <i class="fa-solid fa-user-plus text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-slate-800">Complete hiring</p>
+                            <p class="text-xs text-slate-500">${hiringComplete} - ${hiresNeeded} new ${hiresNeeded === 1 ? 'hire' : 'hires'} onboarded</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+                            <i class="fa-solid fa-check text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-slate-800">Full productivity</p>
+                            <p class="text-xs text-slate-500">${fullyRamped} - Team at target capacity</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                timelineDiv.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+                            <i class="fa-solid fa-check text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-slate-800">No hiring required</p>
+                            <p class="text-xs text-slate-500">Current team can meet targets</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Cost projection (UK estate agency averages)
+            const avgRecruitmentCost = 3500; // Per hire including advertising, time
+            const avgSalary = 32000; // Basic salary for negotiator/sales role
+
+            document.getElementById('recruitmentCost').textContent = `£${(hiresNeeded * avgRecruitmentCost).toLocaleString()}`;
+            document.getElementById('salaryCost').textContent = `£${(hiresNeeded * avgSalary).toLocaleString()}`;
+        });
+    </script>
 
 </body>
 </html>

@@ -57,24 +57,198 @@
         </div>
     </div>
 
-    <!-- Placeholder Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 md:p-12 text-center">
-            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-6">
-                <i class="fa-solid fa-wrench text-2xl"></i>
+    <!-- How It Works -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+        <h2 class="text-xl font-bold text-slate-800 text-center mb-8">How It Works</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+                    <i class="fa-solid fa-percent text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">1. Enter Fees</h3>
+                <p class="text-sm text-slate-600">Input your current fee structure</p>
             </div>
-            <h2 class="text-xl font-bold text-slate-800 mb-3">Tool Coming Soon</h2>
-            <p class="text-slate-600 mb-8 max-w-md mx-auto">
-                This tool is being configured for your account. You'll receive an email when it's ready to use.
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+                    <i class="fa-solid fa-scale-balanced text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">2. Compare</h3>
+                <p class="text-sm text-slate-600">Benchmark against UK averages</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+                    <i class="fa-solid fa-coins text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">3. Revenue Impact</h3>
+                <p class="text-sm text-slate-600">See potential revenue changes</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+                    <i class="fa-solid fa-chart-line text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">4. Opportunities</h3>
+                <p class="text-sm text-slate-600">Identify margin improvements</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Demo -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-slate-50 border-b border-slate-200 px-6 py-4">
+                <h2 class="text-lg font-bold text-slate-800">
+                    <i class="fa-solid fa-play-circle text-emerald-600 mr-2"></i> Try It Now
+                </h2>
+                <p class="text-sm text-slate-600">Enter your fee structure to see how you compare</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+                <!-- Input Form -->
+                <div class="p-6">
+                    <h3 class="font-semibold text-slate-800 mb-4">Your Fee Structure</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Branch / Region</label>
+                            <input type="text" id="branchName" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g., London Central">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Sales Fee (%)</label>
+                            <input type="number" id="salesFee" step="0.1" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="1.2">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Lettings Management Fee (%)</label>
+                            <input type="number" id="managementFee" step="0.1" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="10">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Tenant Find Fee (£)</label>
+                            <input type="number" id="tenantFindFee" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="600">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Average Property Value (£)</label>
+                            <input type="number" id="avgPropertyValue" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="350000">
+                        </div>
+                    </div>
+
+                    <button type="button" id="generateReport" class="w-full mt-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition">
+                        <i class="fa-solid fa-scale-balanced mr-2"></i> Benchmark My Fees
+                    </button>
+                </div>
+
+                <!-- Output Preview -->
+                <div class="p-6 bg-slate-50">
+                    <h3 class="font-semibold text-slate-800 mb-4">Benchmark Analysis</h3>
+
+                    <div id="outputPlaceholder" class="text-center py-12">
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-4">
+                            <i class="fa-solid fa-scale-balanced text-2xl"></i>
+                        </div>
+                        <p class="text-slate-500 text-sm">Enter your fee structure and click Benchmark to see your analysis</p>
+                    </div>
+
+                    <div id="outputReport" class="hidden space-y-4">
+                        <!-- Market Comparison -->
+                        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                            <div class="bg-slate-100 px-4 py-2 border-b border-slate-200">
+                                <h4 class="font-semibold text-slate-700 text-sm">Market Comparison</h4>
+                            </div>
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-slate-100">
+                                        <th class="px-4 py-2 text-left text-slate-600 font-medium">Fee Type</th>
+                                        <th class="px-4 py-2 text-right text-slate-600 font-medium">Yours</th>
+                                        <th class="px-4 py-2 text-right text-slate-600 font-medium">UK Avg</th>
+                                        <th class="px-4 py-2 text-center text-slate-600 font-medium">vs Market</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="border-b border-slate-50">
+                                        <td class="px-4 py-2 text-slate-700">Sales Fee</td>
+                                        <td id="yourSalesFee" class="px-4 py-2 text-right font-medium">-</td>
+                                        <td class="px-4 py-2 text-right text-slate-500">1.2%</td>
+                                        <td id="salesComparison" class="px-4 py-2 text-center">-</td>
+                                    </tr>
+                                    <tr class="border-b border-slate-50">
+                                        <td class="px-4 py-2 text-slate-700">Management Fee</td>
+                                        <td id="yourMgmtFee" class="px-4 py-2 text-right font-medium">-</td>
+                                        <td class="px-4 py-2 text-right text-slate-500">10%</td>
+                                        <td id="mgmtComparison" class="px-4 py-2 text-center">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="px-4 py-2 text-slate-700">Tenant Find</td>
+                                        <td id="yourTenantFee" class="px-4 py-2 text-right font-medium">-</td>
+                                        <td class="px-4 py-2 text-right text-slate-500">£500</td>
+                                        <td id="tenantComparison" class="px-4 py-2 text-center">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Revenue Impact -->
+                        <div class="bg-white rounded-lg border border-slate-200 p-4">
+                            <h4 class="font-semibold text-slate-700 text-sm mb-3">Revenue Per Sale</h4>
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-xs text-slate-500">At your current fee</p>
+                                    <p id="currentRevenue" class="text-xl font-bold text-slate-800">-</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-xs text-slate-500">At market rate</p>
+                                    <p id="marketRevenue" class="text-xl font-bold text-slate-800">-</p>
+                                </div>
+                            </div>
+                            <div id="revenueDiff" class="mt-3 text-center py-2 rounded-lg text-sm font-medium">-</div>
+                        </div>
+
+                        <!-- Competitive Position -->
+                        <div id="positionCard" class="rounded-lg p-4">
+                            <h4 class="font-semibold text-sm mb-2">Competitive Position</h4>
+                            <p id="positionText" class="text-sm">-</p>
+                        </div>
+
+                        <!-- Opportunities -->
+                        <div class="bg-blue-50 rounded-lg border border-blue-200 p-4">
+                            <h4 class="font-semibold text-blue-800 text-sm mb-2">
+                                <i class="fa-solid fa-lightbulb mr-1"></i> Margin Opportunities
+                            </h4>
+                            <ul id="opportunitiesList" class="text-sm text-blue-900 space-y-1">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Get Full Tool -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+        <div class="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl p-8 md:p-12 text-center text-white">
+            <h2 class="text-2xl font-bold mb-4">Get the Full Tool</h2>
+            <p class="text-emerald-100 mb-6 max-w-xl mx-auto">
+                The complete Fee Benchmarking Tool includes regional comparisons, competitor analysis, fee optimisation modelling, and historical trend tracking.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="../thank-you.html" class="px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Back to Toolkit
-                </a>
-                <a href="https://agi-automations.com/contact.html" class="px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition">
-                    Request Early Access
-                </a>
-            </div>
+            <ul class="text-left text-emerald-100 max-w-md mx-auto mb-8 space-y-2">
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-emerald-300"></i> Regional fee comparisons
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-emerald-300"></i> Competitor pricing analysis
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-emerald-300"></i> Fee optimisation modelling
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-emerald-300"></i> Historical trend tracking
+                </li>
+            </ul>
+            <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition">
+                <i class="fa-solid fa-download"></i> Download Full Tool
+            </a>
+            <p class="text-emerald-200 text-xs mt-4">Link available soon</p>
         </div>
     </div>
 
@@ -85,6 +259,113 @@
             <p class="text-xs text-slate-500 mt-2">&copy; 2025 AGI Automations. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        // UK market averages
+        const marketAvg = {
+            salesFee: 1.2,
+            managementFee: 10,
+            tenantFindFee: 500
+        };
+
+        document.getElementById('generateReport').addEventListener('click', function() {
+            const salesFee = parseFloat(document.getElementById('salesFee').value) || 0;
+            const managementFee = parseFloat(document.getElementById('managementFee').value) || 0;
+            const tenantFindFee = parseFloat(document.getElementById('tenantFindFee').value) || 0;
+            const avgPropertyValue = parseFloat(document.getElementById('avgPropertyValue').value) || 0;
+
+            if (salesFee === 0 && managementFee === 0) {
+                alert('Please enter at least one fee type');
+                return;
+            }
+
+            // Show output
+            document.getElementById('outputPlaceholder').classList.add('hidden');
+            document.getElementById('outputReport').classList.remove('hidden');
+
+            // Display your fees
+            document.getElementById('yourSalesFee').textContent = salesFee ? `${salesFee}%` : '-';
+            document.getElementById('yourMgmtFee').textContent = managementFee ? `${managementFee}%` : '-';
+            document.getElementById('yourTenantFee').textContent = tenantFindFee ? `£${tenantFindFee}` : '-';
+
+            // Comparison badges
+            const comparisonBadge = (yours, market, isLowerBetter = false) => {
+                if (!yours) return '-';
+                const diff = ((yours - market) / market) * 100;
+                if (Math.abs(diff) < 5) return '<span class="px-2 py-0.5 rounded text-xs bg-slate-200 text-slate-700">At Market</span>';
+                if (diff > 0) {
+                    return isLowerBetter
+                        ? `<span class="px-2 py-0.5 rounded text-xs bg-red-100 text-red-700">+${diff.toFixed(0)}%</span>`
+                        : `<span class="px-2 py-0.5 rounded text-xs bg-emerald-100 text-emerald-700">+${diff.toFixed(0)}%</span>`;
+                }
+                return isLowerBetter
+                    ? `<span class="px-2 py-0.5 rounded text-xs bg-emerald-100 text-emerald-700">${diff.toFixed(0)}%</span>`
+                    : `<span class="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-700">${diff.toFixed(0)}%</span>`;
+            };
+
+            document.getElementById('salesComparison').innerHTML = comparisonBadge(salesFee, marketAvg.salesFee);
+            document.getElementById('mgmtComparison').innerHTML = comparisonBadge(managementFee, marketAvg.managementFee);
+            document.getElementById('tenantComparison').innerHTML = comparisonBadge(tenantFindFee, marketAvg.tenantFindFee);
+
+            // Revenue calculation
+            const currentRev = avgPropertyValue * (salesFee / 100);
+            const marketRev = avgPropertyValue * (marketAvg.salesFee / 100);
+
+            document.getElementById('currentRevenue').textContent = avgPropertyValue ? `£${currentRev.toLocaleString()}` : '-';
+            document.getElementById('marketRevenue').textContent = avgPropertyValue ? `£${marketRev.toLocaleString()}` : '-';
+
+            const revDiff = document.getElementById('revenueDiff');
+            if (avgPropertyValue && salesFee) {
+                const diff = currentRev - marketRev;
+                if (diff > 0) {
+                    revDiff.className = 'mt-3 text-center py-2 rounded-lg text-sm font-medium bg-emerald-100 text-emerald-700';
+                    revDiff.textContent = `You earn £${diff.toLocaleString()} more per sale than market average`;
+                } else if (diff < 0) {
+                    revDiff.className = 'mt-3 text-center py-2 rounded-lg text-sm font-medium bg-amber-100 text-amber-700';
+                    revDiff.textContent = `You earn £${Math.abs(diff).toLocaleString()} less per sale than market average`;
+                } else {
+                    revDiff.className = 'mt-3 text-center py-2 rounded-lg text-sm font-medium bg-slate-100 text-slate-700';
+                    revDiff.textContent = 'Your fees are at market average';
+                }
+            } else {
+                revDiff.className = 'mt-3 text-center py-2 rounded-lg text-sm font-medium bg-slate-100 text-slate-500';
+                revDiff.textContent = 'Enter property value to see revenue impact';
+            }
+
+            // Competitive position
+            const positionCard = document.getElementById('positionCard');
+            const avgDiff = ((salesFee - marketAvg.salesFee) + (managementFee - marketAvg.managementFee)) / 2;
+
+            if (avgDiff > 0.5) {
+                positionCard.className = 'rounded-lg p-4 bg-emerald-100 text-emerald-800';
+                document.getElementById('positionText').textContent = 'Premium pricing - ensure your service delivery justifies the premium. Focus on value-added services and client experience.';
+            } else if (avgDiff < -0.5) {
+                positionCard.className = 'rounded-lg p-4 bg-amber-100 text-amber-800';
+                document.getElementById('positionText').textContent = 'Below market pricing - potential margin opportunity. Review if fees can be increased or if volume strategy is intentional.';
+            } else {
+                positionCard.className = 'rounded-lg p-4 bg-blue-100 text-blue-800';
+                document.getElementById('positionText').textContent = 'Competitive pricing - well-aligned with market norms. Focus on service differentiation to justify any future increases.';
+            }
+
+            // Opportunities
+            const opportunities = [];
+            if (salesFee < marketAvg.salesFee - 0.1) {
+                const potentialIncrease = avgPropertyValue * ((marketAvg.salesFee - salesFee) / 100);
+                opportunities.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-arrow-up text-blue-600 mt-0.5"></i>Increasing sales fee to market rate could add £${potentialIncrease.toLocaleString()} per transaction</li>`);
+            }
+            if (managementFee < marketAvg.managementFee - 1) {
+                opportunities.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-arrow-up text-blue-600 mt-0.5"></i>Management fee is ${(marketAvg.managementFee - managementFee).toFixed(1)}% below market - review pricing strategy</li>`);
+            }
+            if (tenantFindFee < marketAvg.tenantFindFee - 50) {
+                opportunities.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-arrow-up text-blue-600 mt-0.5"></i>Tenant find fee £${marketAvg.tenantFindFee - tenantFindFee} below average - potential quick win</li>`);
+            }
+            if (opportunities.length === 0) {
+                opportunities.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-check-circle text-blue-600 mt-0.5"></i>Your fees are competitive - focus on service quality to maintain pricing power</li>`);
+            }
+
+            document.getElementById('opportunitiesList').innerHTML = opportunities.join('');
+        });
+    </script>
 
 </body>
 </html>

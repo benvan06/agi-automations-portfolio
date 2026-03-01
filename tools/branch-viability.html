@@ -57,24 +57,186 @@
         </div>
     </div>
 
-    <!-- Placeholder Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 md:p-12 text-center">
-            <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-6">
-                <i class="fa-solid fa-wrench text-2xl"></i>
+    <!-- How It Works -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+        <h2 class="text-xl font-bold text-slate-800 text-center mb-8">How It Works</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-3">
+                    <i class="fa-solid fa-location-dot text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">1. Target Location</h3>
+                <p class="text-sm text-slate-600">Enter the area you're considering</p>
             </div>
-            <h2 class="text-xl font-bold text-slate-800 mb-3">Tool Coming Soon</h2>
-            <p class="text-slate-600 mb-8 max-w-md mx-auto">
-                This tool is being configured for your account. You'll receive an email when it's ready to use.
+            <div class="text-center">
+                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-3">
+                    <i class="fa-solid fa-coins text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">2. Investment</h3>
+                <p class="text-sm text-slate-600">Setup costs and market data</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-3">
+                    <i class="fa-solid fa-calculator text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">3. Analyse</h3>
+                <p class="text-sm text-slate-600">Get viability assessment</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 mx-auto mb-3">
+                    <i class="fa-solid fa-check-circle text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">4. Decide</h3>
+                <p class="text-sm text-slate-600">Make informed expansion decision</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Demo -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-slate-50 border-b border-slate-200 px-6 py-4">
+                <h2 class="text-lg font-bold text-slate-800">
+                    <i class="fa-solid fa-play-circle text-amber-600 mr-2"></i> Try It Now
+                </h2>
+                <p class="text-sm text-slate-600">Enter location details to assess viability</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+                <!-- Input Form -->
+                <div class="p-6">
+                    <h3 class="font-semibold text-slate-800 mb-4">Location Details</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Target Location / Postcode</label>
+                            <input type="text" id="location" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="e.g., Wimbledon, SW19">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Estimated Setup Cost (£)</label>
+                            <input type="number" id="setupCost" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="75000">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Local Competition (Number of Agents)</label>
+                            <input type="number" id="competition" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="8">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Average Property Value in Area (£)</label>
+                            <input type="number" id="avgPropertyValue" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="450000">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Households in Area (Estimate)</label>
+                            <input type="number" id="households" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="15000">
+                        </div>
+                    </div>
+
+                    <button type="button" id="generateReport" class="w-full mt-6 py-3 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700 transition">
+                        <i class="fa-solid fa-compass mr-2"></i> Analyse Viability
+                    </button>
+                </div>
+
+                <!-- Output Preview -->
+                <div class="p-6 bg-slate-50">
+                    <h3 class="font-semibold text-slate-800 mb-4">Viability Assessment</h3>
+
+                    <div id="outputPlaceholder" class="text-center py-12">
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-4">
+                            <i class="fa-solid fa-compass text-2xl"></i>
+                        </div>
+                        <p class="text-slate-500 text-sm">Enter location details and click Analyse to see viability assessment</p>
+                    </div>
+
+                    <div id="outputReport" class="hidden space-y-4">
+                        <!-- Viability Score -->
+                        <div id="viabilityCard" class="rounded-lg p-6 text-center">
+                            <p class="text-sm uppercase tracking-wide mb-2 opacity-80">Viability Score</p>
+                            <p id="viabilityScore" class="text-5xl font-bold mb-2">-</p>
+                            <p id="viabilityLabel" class="text-lg font-semibold">-</p>
+                        </div>
+
+                        <!-- Key Metrics -->
+                        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                            <div class="bg-slate-100 px-4 py-2 border-b border-slate-200">
+                                <h4 class="font-semibold text-slate-700 text-sm">Key Indicators</h4>
+                            </div>
+                            <div class="divide-y divide-slate-100">
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Market Opportunity</span>
+                                    <span id="marketOpportunity" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Competition Intensity</span>
+                                    <span id="competitionLevel" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Revenue Potential</span>
+                                    <span id="revenuePotential" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Break-even Estimate</span>
+                                    <span id="breakEven" class="text-sm font-semibold">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Financial Summary -->
+                        <div class="bg-white rounded-lg border border-slate-200 p-4">
+                            <h4 class="font-semibold text-slate-700 text-sm mb-3">Financial Projection (Year 1)</h4>
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div class="bg-slate-50 rounded-lg p-3">
+                                    <p class="text-xs text-slate-500">Estimated Transactions</p>
+                                    <p id="estTransactions" class="text-lg font-bold text-slate-800">-</p>
+                                </div>
+                                <div class="bg-slate-50 rounded-lg p-3">
+                                    <p class="text-xs text-slate-500">Estimated Revenue</p>
+                                    <p id="estRevenue" class="text-lg font-bold text-slate-800">-</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Key Risks -->
+                        <div class="bg-red-50 rounded-lg border border-red-200 p-4">
+                            <h4 class="font-semibold text-red-800 text-sm mb-2">
+                                <i class="fa-solid fa-exclamation-triangle mr-1"></i> Key Risks
+                            </h4>
+                            <ul id="risksList" class="text-sm text-red-900 space-y-1">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Get Full Tool -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+        <div class="bg-gradient-to-br from-amber-600 to-amber-700 rounded-2xl p-8 md:p-12 text-center text-white">
+            <h2 class="text-2xl font-bold mb-4">Get the Full Tool</h2>
+            <p class="text-amber-100 mb-6 max-w-xl mx-auto">
+                The complete Branch Viability Analyser includes demographic data integration, competitor mapping, detailed P&L projections, and site comparison tools.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="../thank-you.html" class="px-6 py-3 rounded-lg bg-amber-600 text-white font-semibold hover:bg-amber-700 transition">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Back to Toolkit
-                </a>
-                <a href="https://agi-automations.com/contact.html" class="px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition">
-                    Request Early Access
-                </a>
-            </div>
+            <ul class="text-left text-amber-100 max-w-md mx-auto mb-8 space-y-2">
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-amber-300"></i> Demographic data integration
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-amber-300"></i> Competitor mapping & analysis
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-amber-300"></i> Detailed P&L projections
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-amber-300"></i> Multi-site comparison tool
+                </li>
+            </ul>
+            <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-amber-700 font-semibold rounded-lg hover:bg-amber-50 transition">
+                <i class="fa-solid fa-download"></i> Download Full Tool
+            </a>
+            <p class="text-amber-200 text-xs mt-4">Link available soon</p>
         </div>
     </div>
 
@@ -85,6 +247,120 @@
             <p class="text-xs text-slate-500 mt-2">&copy; 2025 AGI Automations. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        document.getElementById('generateReport').addEventListener('click', function() {
+            const location = document.getElementById('location').value || 'Target Area';
+            const setupCost = parseFloat(document.getElementById('setupCost').value) || 0;
+            const competition = parseInt(document.getElementById('competition').value) || 0;
+            const avgPropertyValue = parseFloat(document.getElementById('avgPropertyValue').value) || 0;
+            const households = parseInt(document.getElementById('households').value) || 0;
+
+            if (setupCost === 0 || households === 0) {
+                alert('Please enter setup cost and household estimate');
+                return;
+            }
+
+            // Show output
+            document.getElementById('outputPlaceholder').classList.add('hidden');
+            document.getElementById('outputReport').classList.remove('hidden');
+
+            // Calculate metrics
+            // Assume 5% of households transact annually, split among agents
+            const annualTransactions = (households * 0.05);
+            const marketShare = competition > 0 ? 1 / (competition + 1) : 0.15; // New entrant gets smaller share
+            const estTransactions = Math.round(annualTransactions * marketShare * 0.7); // 70% of fair share for new branch
+            const avgFee = avgPropertyValue * 0.012; // 1.2% average fee
+            const estRevenue = estTransactions * avgFee;
+
+            // Score calculation (0-100)
+            let score = 50; // Base
+
+            // Market size factor
+            if (households > 20000) score += 15;
+            else if (households > 10000) score += 10;
+            else if (households < 5000) score -= 10;
+
+            // Competition factor
+            if (competition < 5) score += 15;
+            else if (competition < 10) score += 5;
+            else if (competition > 15) score -= 15;
+
+            // Property value factor
+            if (avgPropertyValue > 500000) score += 10;
+            else if (avgPropertyValue > 300000) score += 5;
+            else if (avgPropertyValue < 200000) score -= 10;
+
+            // ROI factor
+            const breakEvenMonths = estRevenue > 0 ? Math.ceil((setupCost / estRevenue) * 12) : 36;
+            if (breakEvenMonths < 12) score += 10;
+            else if (breakEvenMonths < 18) score += 5;
+            else if (breakEvenMonths > 24) score -= 10;
+
+            score = Math.max(20, Math.min(95, score));
+
+            // Display viability score
+            const viabilityCard = document.getElementById('viabilityCard');
+            let viabilityLabel, bgClass;
+
+            if (score >= 75) {
+                viabilityLabel = 'High Potential';
+                bgClass = 'bg-emerald-500 text-white';
+            } else if (score >= 55) {
+                viabilityLabel = 'Moderate Potential';
+                bgClass = 'bg-amber-400 text-amber-900';
+            } else {
+                viabilityLabel = 'Challenging';
+                bgClass = 'bg-red-500 text-white';
+            }
+
+            viabilityCard.className = `rounded-lg p-6 text-center ${bgClass}`;
+            document.getElementById('viabilityScore').textContent = score;
+            document.getElementById('viabilityLabel').textContent = viabilityLabel;
+
+            // Key indicators
+            const ratingBadge = (level) => {
+                if (level === 'high') return '<span class="text-emerald-600">High</span>';
+                if (level === 'medium') return '<span class="text-amber-600">Medium</span>';
+                return '<span class="text-red-600">Low</span>';
+            };
+
+            document.getElementById('marketOpportunity').innerHTML = ratingBadge(
+                households > 15000 ? 'high' : households > 8000 ? 'medium' : 'low'
+            );
+            document.getElementById('competitionLevel').innerHTML = ratingBadge(
+                competition < 5 ? 'low' : competition < 12 ? 'medium' : 'high'
+            );
+            document.getElementById('revenuePotential').innerHTML = ratingBadge(
+                estRevenue > 150000 ? 'high' : estRevenue > 80000 ? 'medium' : 'low'
+            );
+            document.getElementById('breakEven').textContent = `${breakEvenMonths} months`;
+
+            // Financial projection
+            document.getElementById('estTransactions').textContent = estTransactions;
+            document.getElementById('estRevenue').textContent = `£${Math.round(estRevenue).toLocaleString()}`;
+
+            // Risks
+            const risks = [];
+            if (competition > 10) {
+                risks.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-circle text-red-500 mt-1 text-xs"></i>High competition with ${competition} existing agents - market penetration will be challenging</li>`);
+            }
+            if (breakEvenMonths > 18) {
+                risks.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-circle text-red-500 mt-1 text-xs"></i>Long break-even period (${breakEvenMonths} months) - ensure adequate working capital</li>`);
+            }
+            if (households < 8000) {
+                risks.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-circle text-red-500 mt-1 text-xs"></i>Limited market size - may struggle to achieve scale</li>`);
+            }
+            if (setupCost > 100000) {
+                risks.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-circle text-red-500 mt-1 text-xs"></i>High setup cost increases risk profile</li>`);
+            }
+            if (risks.length === 0) {
+                risks.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-circle text-red-500 mt-1 text-xs"></i>Standard market entry risks apply - recommend detailed local research</li>`);
+            }
+
+            document.getElementById('risksList').innerHTML = risks.join('');
+        });
+    </script>
 
 </body>
 </html>

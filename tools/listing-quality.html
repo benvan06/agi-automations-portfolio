@@ -57,24 +57,205 @@
         </div>
     </div>
 
-    <!-- Placeholder Content -->
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-16">
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 md:p-12 text-center">
-            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-6">
-                <i class="fa-solid fa-wrench text-2xl"></i>
+    <!-- How It Works -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-12">
+        <h2 class="text-xl font-bold text-slate-800 text-center mb-8">How It Works</h2>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+                    <i class="fa-solid fa-home text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">1. Enter Property</h3>
+                <p class="text-sm text-slate-600">Add the listing details</p>
             </div>
-            <h2 class="text-xl font-bold text-slate-800 mb-3">Tool Coming Soon</h2>
-            <p class="text-slate-600 mb-8 max-w-md mx-auto">
-                This tool is being configured for your account. You'll receive an email when it's ready to use.
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+                    <i class="fa-solid fa-camera text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">2. Media Check</h3>
+                <p class="text-sm text-slate-600">Photos, floor plans, video tours</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+                    <i class="fa-solid fa-star text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">3. Get Score</h3>
+                <p class="text-sm text-slate-600">0-100 quality rating</p>
+            </div>
+            <div class="text-center">
+                <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mx-auto mb-3">
+                    <i class="fa-solid fa-arrow-up text-lg"></i>
+                </div>
+                <h3 class="font-semibold text-slate-800 mb-1">4. Improve</h3>
+                <p class="text-sm text-slate-600">Actionable suggestions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Demo -->
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-slate-50 border-b border-slate-200 px-6 py-4">
+                <h2 class="text-lg font-bold text-slate-800">
+                    <i class="fa-solid fa-play-circle text-emerald-600 mr-2"></i> Try It Now
+                </h2>
+                <p class="text-sm text-slate-600">Enter listing details to get a quality score</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-slate-200">
+                <!-- Input Form -->
+                <div class="p-6">
+                    <h3 class="font-semibold text-slate-800 mb-4">Listing Details</h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Property Address</label>
+                            <input type="text" id="address" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="e.g., 45 Oak Street, Manchester, M1 2AB">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Number of Photos</label>
+                                <input type="number" id="photos" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="12">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Description Word Count</label>
+                                <input type="number" id="wordCount" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="250">
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <p class="text-xs font-medium text-slate-600">Listing Features</p>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="hasFloorplan" class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500">
+                                <label for="hasFloorplan" class="text-sm text-slate-700">Has Floor Plan</label>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="hasEpc" class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500">
+                                <label for="hasEpc" class="text-sm text-slate-700">Has EPC Certificate</label>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="hasVideo" class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500">
+                                <label for="hasVideo" class="text-sm text-slate-700">Has Video Tour</label>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="hasVirtualTour" class="w-4 h-4 text-emerald-600 border-slate-300 rounded focus:ring-emerald-500">
+                                <label for="hasVirtualTour" class="text-sm text-slate-700">Has Virtual Tour / 360</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" id="generateReport" class="w-full mt-6 py-3 bg-emerald-600 text-white font-semibold rounded-lg hover:bg-emerald-700 transition">
+                        <i class="fa-solid fa-star mr-2"></i> Score This Listing
+                    </button>
+                </div>
+
+                <!-- Output Preview -->
+                <div class="p-6 bg-slate-50">
+                    <h3 class="font-semibold text-slate-800 mb-4">Quality Scorecard</h3>
+
+                    <div id="outputPlaceholder" class="text-center py-12">
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center text-slate-400 mx-auto mb-4">
+                            <i class="fa-solid fa-star text-2xl"></i>
+                        </div>
+                        <p class="text-slate-500 text-sm">Enter listing details and click Score to see your quality assessment</p>
+                    </div>
+
+                    <div id="outputReport" class="hidden space-y-4">
+                        <!-- Overall Score -->
+                        <div id="scoreCard" class="rounded-lg p-6 text-center">
+                            <p class="text-sm uppercase tracking-wide mb-2 opacity-80">Listing Quality Score</p>
+                            <p id="qualityScore" class="text-5xl font-bold mb-2">-</p>
+                            <p id="qualityLabel" class="text-lg font-semibold">-</p>
+                        </div>
+
+                        <!-- Score Breakdown -->
+                        <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                            <div class="bg-slate-100 px-4 py-2 border-b border-slate-200">
+                                <h4 class="font-semibold text-slate-700 text-sm">Score Breakdown</h4>
+                            </div>
+                            <div class="divide-y divide-slate-100">
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Photography</span>
+                                    <span id="photoScore" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Description</span>
+                                    <span id="descScore" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Floor Plan</span>
+                                    <span id="floorplanScore" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Compliance (EPC)</span>
+                                    <span id="epcScore" class="text-sm font-semibold">-</span>
+                                </div>
+                                <div class="px-4 py-3 flex justify-between items-center">
+                                    <span class="text-sm text-slate-600">Rich Media</span>
+                                    <span id="mediaScore" class="text-sm font-semibold">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Portal Readiness -->
+                        <div class="bg-white rounded-lg border border-slate-200 p-4">
+                            <h4 class="font-semibold text-slate-700 text-sm mb-3">Portal Readiness</h4>
+                            <div class="grid grid-cols-3 gap-2 text-center">
+                                <div class="bg-slate-50 rounded-lg p-2">
+                                    <p id="rightmoveReady" class="text-lg font-bold">-</p>
+                                    <p class="text-xs text-slate-500">Rightmove</p>
+                                </div>
+                                <div class="bg-slate-50 rounded-lg p-2">
+                                    <p id="zooplaReady" class="text-lg font-bold">-</p>
+                                    <p class="text-xs text-slate-500">Zoopla</p>
+                                </div>
+                                <div class="bg-slate-50 rounded-lg p-2">
+                                    <p id="otmReady" class="text-lg font-bold">-</p>
+                                    <p class="text-xs text-slate-500">OnTheMarket</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Improvements -->
+                        <div id="improvementsSection" class="bg-blue-50 rounded-lg border border-blue-200 p-4">
+                            <h4 class="font-semibold text-blue-800 text-sm mb-2">
+                                <i class="fa-solid fa-arrow-up mr-1"></i> Improvement Suggestions
+                            </h4>
+                            <ul id="improvementsList" class="text-sm text-blue-900 space-y-1">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Get Full Tool -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 py-12">
+        <div class="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl p-8 md:p-12 text-center text-white">
+            <h2 class="text-2xl font-bold mb-4">Get the Full Tool</h2>
+            <p class="text-emerald-100 mb-6 max-w-xl mx-auto">
+                The complete Listing Quality Scorecard includes batch analysis, branch comparisons, automated portal checks, and photo quality AI assessment.
             </p>
-            <div class="flex flex-col sm:flex-row justify-center gap-4">
-                <a href="../thank-you.html" class="px-6 py-3 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition">
-                    <i class="fa-solid fa-arrow-left mr-2"></i> Back to Toolkit
-                </a>
-                <a href="https://agi-automations.com/contact.html" class="px-6 py-3 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition">
-                    Request Early Access
-                </a>
-            </div>
+            <ul class="text-left text-emerald-100 max-w-md mx-auto mb-8 space-y-2">
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-emerald-300"></i> Batch listing analysis
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-emerald-300"></i> Branch-by-branch comparisons
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-emerald-300"></i> AI photo quality scoring
+                </li>
+                <li class="flex items-center gap-2">
+                    <i class="fa-solid fa-check text-emerald-300"></i> Automated portal compliance checks
+                </li>
+            </ul>
+            <a href="#" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition">
+                <i class="fa-solid fa-download"></i> Download Full Tool
+            </a>
+            <p class="text-emerald-200 text-xs mt-4">Link available soon</p>
         </div>
     </div>
 
@@ -85,6 +266,104 @@
             <p class="text-xs text-slate-500 mt-2">&copy; 2025 AGI Automations. All rights reserved.</p>
         </div>
     </footer>
+
+    <script>
+        document.getElementById('generateReport').addEventListener('click', function() {
+            const photos = parseInt(document.getElementById('photos').value) || 0;
+            const wordCount = parseInt(document.getElementById('wordCount').value) || 0;
+            const hasFloorplan = document.getElementById('hasFloorplan').checked;
+            const hasEpc = document.getElementById('hasEpc').checked;
+            const hasVideo = document.getElementById('hasVideo').checked;
+            const hasVirtualTour = document.getElementById('hasVirtualTour').checked;
+
+            // Show output
+            document.getElementById('outputPlaceholder').classList.add('hidden');
+            document.getElementById('outputReport').classList.remove('hidden');
+
+            // Calculate scores (each category max 20 points)
+            // Photos: 10+ is excellent (20), 6-9 is good (15), 3-5 is ok (10), <3 is poor (5)
+            let photoPoints = photos >= 10 ? 20 : photos >= 6 ? 15 : photos >= 3 ? 10 : 5;
+
+            // Description: 200+ words is excellent (20), 100-199 is good (15), 50-99 is ok (10), <50 is poor (5)
+            let descPoints = wordCount >= 200 ? 20 : wordCount >= 100 ? 15 : wordCount >= 50 ? 10 : 5;
+
+            // Floor plan: 20 or 0
+            let floorplanPoints = hasFloorplan ? 20 : 0;
+
+            // EPC: 20 or 0 (required for compliance)
+            let epcPoints = hasEpc ? 20 : 0;
+
+            // Rich media: 10 each for video and virtual tour
+            let mediaPoints = (hasVideo ? 10 : 0) + (hasVirtualTour ? 10 : 0);
+
+            // Total score
+            let totalScore = photoPoints + descPoints + floorplanPoints + epcPoints + mediaPoints;
+
+            // Display score breakdown
+            const scoreText = (pts, max) => {
+                const pct = (pts / max) * 100;
+                if (pct >= 80) return `<span class="text-emerald-600">${pts}/${max}</span>`;
+                if (pct >= 50) return `<span class="text-amber-600">${pts}/${max}</span>`;
+                return `<span class="text-red-600">${pts}/${max}</span>`;
+            };
+
+            document.getElementById('photoScore').innerHTML = scoreText(photoPoints, 20);
+            document.getElementById('descScore').innerHTML = scoreText(descPoints, 20);
+            document.getElementById('floorplanScore').innerHTML = scoreText(floorplanPoints, 20);
+            document.getElementById('epcScore').innerHTML = scoreText(epcPoints, 20);
+            document.getElementById('mediaScore').innerHTML = scoreText(mediaPoints, 20);
+
+            // Overall score styling
+            const scoreCard = document.getElementById('scoreCard');
+            let qualityLabel, bgClass;
+
+            if (totalScore >= 80) {
+                qualityLabel = 'Premium Listing';
+                bgClass = 'bg-emerald-500 text-white';
+            } else if (totalScore >= 60) {
+                qualityLabel = 'Good Quality';
+                bgClass = 'bg-emerald-400 text-white';
+            } else if (totalScore >= 40) {
+                qualityLabel = 'Needs Improvement';
+                bgClass = 'bg-amber-400 text-amber-900';
+            } else {
+                qualityLabel = 'Below Standard';
+                bgClass = 'bg-red-500 text-white';
+            }
+
+            scoreCard.className = `rounded-lg p-6 text-center ${bgClass}`;
+            document.getElementById('qualityScore').textContent = totalScore;
+            document.getElementById('qualityLabel').textContent = qualityLabel;
+
+            // Portal readiness (Rightmove Premium needs 10+ photos, floor plan, EPC)
+            const ready = '<span class="text-emerald-600">Ready</span>';
+            const notReady = '<span class="text-red-600">Not Ready</span>';
+            const basic = '<span class="text-amber-600">Basic</span>';
+
+            // Rightmove Premium: needs 10+ photos, floor plan
+            document.getElementById('rightmoveReady').innerHTML = (photos >= 10 && hasFloorplan && hasEpc) ? ready : (photos >= 5 && hasEpc) ? basic : notReady;
+
+            // Zoopla Premium: similar requirements
+            document.getElementById('zooplaReady').innerHTML = (photos >= 8 && hasFloorplan && hasEpc) ? ready : (photos >= 5 && hasEpc) ? basic : notReady;
+
+            // OnTheMarket
+            document.getElementById('otmReady').innerHTML = (photos >= 6 && hasEpc) ? ready : (photos >= 3) ? basic : notReady;
+
+            // Improvements
+            const improvements = [];
+            if (photos < 10) improvements.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-camera text-blue-600 mt-0.5"></i>Add ${10 - photos} more photos to reach premium standards</li>`);
+            if (wordCount < 200) improvements.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-file-lines text-blue-600 mt-0.5"></i>Expand description to 200+ words for better engagement</li>`);
+            if (!hasFloorplan) improvements.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-vector-square text-blue-600 mt-0.5"></i>Add floor plan - essential for serious buyers</li>`);
+            if (!hasEpc) improvements.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-certificate text-blue-600 mt-0.5"></i>Add EPC certificate - legally required</li>`);
+            if (!hasVideo && !hasVirtualTour) improvements.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-video text-blue-600 mt-0.5"></i>Consider adding video tour or 360 virtual tour</li>`);
+
+            if (improvements.length === 0) {
+                improvements.push(`<li class="flex items-start gap-2"><i class="fa-solid fa-check-circle text-blue-600 mt-0.5"></i>Listing meets premium quality standards</li>`);
+            }
+
+            document.getElementById('improvementsList').innerHTML = improvements.join('');
+        });
+    </script>
 
 </body>
 </html>
